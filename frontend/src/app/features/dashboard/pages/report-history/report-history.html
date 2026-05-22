@@ -1,0 +1,66 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Histórico de Relatórios</h2>
+      <p class="page-subtitle">Relatórios históricos de burnout do seu time</p>
+    </div>
+    <button mat-flat-button color="primary">
+      <mat-icon>download</mat-icon> Exportar CSV
+    </button>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <table mat-table [dataSource]="items()" class="full-table">
+
+        <ng-container matColumnDef="member">
+          <th mat-header-cell *matHeaderCellDef>Funcionário</th>
+          <td mat-cell *matCellDef="let row"><strong>{{ row.member }}</strong></td>
+        </ng-container>
+
+        <ng-container matColumnDef="report">
+          <th mat-header-cell *matHeaderCellDef>Relatório</th>
+          <td mat-cell *matCellDef="let row">{{ row.report }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Data</th>
+          <td mat-cell *matCellDef="let row">{{ row.date }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="score">
+          <th mat-header-cell *matHeaderCellDef>Score</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="score-value">{{ row.score }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="risk">
+          <th mat-header-cell *matHeaderCellDef>Nível de Risco</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-chip" [class]="row.risk">{{ riskLabel(row.risk) }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="trend">
+          <th mat-header-cell *matHeaderCellDef>Trend</th>
+          <td mat-cell *matCellDef="let row">
+            <mat-icon [style.color]="trendColor(row.trend)">{{ trendIcon(row.trend) }}</mat-icon>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button matTooltip="Ver relatório">
+              <mat-icon>visibility</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>

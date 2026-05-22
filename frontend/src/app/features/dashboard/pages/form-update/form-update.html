@@ -1,0 +1,265 @@
+<div class="builder-layout">
+  <!-- Left: palette -->
+  <aside class="palette">
+    <h3 class="palette-title">Tipos de Campo</h3>
+    <p class="palette-hint">Clique para adicionar um campo</p>
+
+    @if (lockedByResponses()) {
+      <p class="palette-hint" style="color:#b45309">Este formulário já possui respostas e não pode ser editado.</p>
+    }
+
+    @for (ft of fieldTypes; track ft.type) {
+      <button class="palette-btn" (click)="addField(ft.type)" [disabled]="lockedByResponses()">
+        <mat-icon>{{ ft.icon }}</mat-icon>
+        <span>{{ ft.label }}</span>
+      </button>
+    }
+  </aside>
+
+  <!-- Right: canvas -->
+  <div class="canvas-wrap">
+    @if (loading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else {
+    <mat-card class="meta-card">
+      <mat-card-content>
+        <h2 class="page-title" style="margin-bottom:16px">Editar Avaliação</h2>
+        <mat-form-field appearance="outline" style="width:100%">
+          <mat-label>Título do Formulário</mat-label>
+          <input matInput [formControl]="metaForm.controls['title']" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="width:100%">
+          <mat-label>Descrição</mat-label>
+          <textarea matInput [formControl]="metaForm.controls['description']" rows="2"></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    @for (field of fields(); track field.id; let i = $index) {
+      <mat-card class="field-card">
+        <mat-card-content>
+          <div class="field-header">
+            <div class="field-type-badge">
+              <mat-icon>{{ fieldIcon(field.type) }}</mat-icon>
+              <span class="field-type-name">{{ fieldLabel(field.type) }}</span>
+            </div>
+            <mat-form-field appearance="outline" class="label-field">
+              <mat-label>Rótulo da pergunta</mat-label>
+              <input matInput [(ngModel)]="field.label" [disabled]="lockedByResponses()" />
+            </mat-form-field>
+            <mat-slide-toggle [(ngModel)]="field.required" color="primary" [disabled]="lockedByResponses()">Obrigatório</mat-slide-toggle>
+            <div class="field-controls">
+              <button mat-icon-button matTooltip="Mover para cima" (click)="moveUp(i)" [disabled]="i === 0 || lockedByResponses()">
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Mover para baixo" (click)="moveDown(i)" [disabled]="i === fields().length - 1 || lockedByResponses()">
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" matTooltip="Remover" (click)="removeField(field.id)" [disabled]="lockedByResponses()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          @if (field.type === 'SINGLE_CHOICE' || field.type === 'MULTIPLE_CHOICE' || field.type === 'RANKING') {
+            <div class="options-list">
+              <p class="config-label">{{ field.type === 'RANKING' ? 'Itens para classificar' : 'Opções' }}</p>
+              @for (opt of field.options; track $index; let oi = $index) {
+                <div class="option-row">
+                  <mat-icon class="option-bullet">
+                    {{ field.type === 'SINGLE_CHOICE' ? 'radio_button_unchecked' : field.type === 'RANKING' ? 'drag_indicator' : 'check_box_outline_blank' }}
+                  </mat-icon>
+                  <input class="option-input" [(ngModel)]="field.options[oi]" [disabled]="lockedByResponses()" />
+                  <button mat-icon-button (click)="removeOption(field, oi)" [disabled]="field.options.length <= 1 || lockedByResponses()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              }
+              <button mat-button color="primary" (click)="addOption(field)" [disabled]="lockedByResponses()">
+                <mat-icon>add</mat-icon> Adicionar opção
+              </button>
+            </div>
+          }
+
+          @if (field.type === 'LIKERT') {
+            <div class="options-list">
+              <p class="config-label">Rótulos Likert (esquerda → direita)</p>
+              @for (opt of field.options; track $index; let oi = $index) {
+                <div class="option-row">
+                  <span class="option-num">{{ oi + 1 }}</span>
+                  <input class="option-input" [(ngModel)]="field.options[oi]" [disabled]="lockedByResponses()" />
+                  <button mat-icon-button (click)="removeOption(field, oi)" [disabled]="field.options.length <= 2 || lockedByResponses()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              }
+              <button mat-button color="primary" (click)="addOption(field)" [disabled]="lockedByResponses()">
+                <mat-icon>add</mat-icon> Adicionar rótulo
+              </button>
+            </div>
+          }
+
+          @if (field.type === 'SCALE') {
+            <div class="scale-config">
+              <div class="scale-config-row">
+                <mat-form-field appearance="outline" style="width:100px">
+                  <mat-label>Min</mat-label>
+                  <input matInput type="number" [(ngModel)]="field.scaleMin" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" style="width:100px">
+                  <mat-label>Max</mat-label>
+                  <input matInput type="number" [(ngModel)]="field.scaleMax" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" style="width:160px">
+                  <mat-label>Rótulo mínimo</mat-label>
+                  <input matInput [(ngModel)]="field.scaleMinLabel" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" style="width:160px">
+                  <mat-label>Rótulo máximo</mat-label>
+                  <input matInput [(ngModel)]="field.scaleMaxLabel" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+              </div>
+              <div class="scale-preview">
+                @for (n of scaleRange(field); track n) {
+                  <div class="scale-dot">{{ n }}</div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (field.type === 'SLIDER') {
+            <div class="scale-config">
+              <div class="scale-config-row">
+                <mat-form-field appearance="outline" style="width:100px">
+                  <mat-label>Min</mat-label>
+                  <input matInput type="number" [(ngModel)]="field.sliderMin" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" style="width:100px">
+                  <mat-label>Max</mat-label>
+                  <input matInput type="number" [(ngModel)]="field.sliderMax" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" style="width:100px">
+                  <mat-label>Step</mat-label>
+                  <input matInput type="number" [(ngModel)]="field.sliderStep" min="1" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+              </div>
+              <div class="slider-preview-row">
+                <span>{{ field.sliderMin }}</span>
+                <div class="slider-track"><div class="slider-thumb"></div></div>
+                <span>{{ field.sliderMax }}</span>
+              </div>
+            </div>
+          }
+
+          @if (field.type === 'BOOLEAN') {
+            <div class="boolean-preview">
+              <button class="bool-btn yes">Sim</button>
+              <button class="bool-btn no">Não</button>
+            </div>
+          }
+
+          @if (field.type === 'MATRIX') {
+            <div class="matrix-config">
+              <div class="matrix-columns">
+                <p class="config-label">Colunas</p>
+                @for (col of field.matrixColumns; track $index; let ci = $index) {
+                  <div class="option-row">
+                    <input class="option-input" [(ngModel)]="field.matrixColumns[ci]" [disabled]="lockedByResponses()" />
+                    <button mat-icon-button (click)="removeMatrixColumn(field, ci)" [disabled]="field.matrixColumns.length <= 1 || lockedByResponses()">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+                <button mat-button color="primary" (click)="addMatrixColumn(field)" [disabled]="lockedByResponses()">
+                  <mat-icon>add</mat-icon> Adicionar coluna
+                </button>
+              </div>
+              <div class="matrix-rows">
+                <p class="config-label">Linhas</p>
+                @for (opt of field.options; track $index; let oi = $index) {
+                  <div class="option-row">
+                    <input class="option-input" [(ngModel)]="field.options[oi]" [disabled]="lockedByResponses()" />
+                    <button mat-icon-button (click)="removeOption(field, oi)" [disabled]="field.options.length <= 1 || lockedByResponses()">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+                <button mat-button color="primary" (click)="addOption(field)" [disabled]="lockedByResponses()">
+                  <mat-icon>add</mat-icon> Adicionar linha
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (field.type === 'TEXT' || field.type === 'LONG_TEXT') {
+            <div class="text-preview">
+              <span class="text-preview-placeholder">
+                {{ field.type === 'TEXT' ? 'Resposta curta...' : 'Resposta longa...' }}
+              </span>
+            </div>
+          }
+
+          @if (field.type === 'NUMERIC') {
+            <div class="text-preview"><span class="text-preview-placeholder">0</span></div>
+          }
+
+          @if (field.type === 'DATE') {
+            <div class="text-preview"><span class="text-preview-placeholder">DD / MM / YYYY</span></div>
+          }
+
+          @if (field.type === 'MAP') {
+            <div class="map-config">
+              <p class="config-label">Rótulos dos eixos</p>
+              <div class="map-axis-inputs">
+                <mat-form-field appearance="outline" style="width:160px">
+                  <mat-label>Top (Y+)</mat-label>
+                  <input matInput [(ngModel)]="field.mapYTopLabel" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" style="width:160px">
+                  <mat-label>Bottom (Y−)</mat-label>
+                  <input matInput [(ngModel)]="field.mapYBottomLabel" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" style="width:160px">
+                  <mat-label>Left (X−)</mat-label>
+                  <input matInput [(ngModel)]="field.mapXLeftLabel" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" style="width:160px">
+                  <mat-label>Right (X+)</mat-label>
+                  <input matInput [(ngModel)]="field.mapXRightLabel" [disabled]="lockedByResponses()" />
+                </mat-form-field>
+              </div>
+              <div class="map-plane-wrap">
+                <div class="map-plane static">
+                  <div class="map-axis-h"></div>
+                  <div class="map-axis-v"></div>
+                  <span class="map-lbl map-lbl-top">{{ field.mapYTopLabel }}</span>
+                  <span class="map-lbl map-lbl-bottom">{{ field.mapYBottomLabel }}</span>
+                  <span class="map-lbl map-lbl-left">{{ field.mapXLeftLabel }}</span>
+                  <span class="map-lbl map-lbl-right">{{ field.mapXRightLabel }}</span>
+                  <div class="map-center-hint">
+                    <mat-icon>touch_app</mat-icon>
+                    <span>O respondente clica para marcar um ponto</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <div class="builder-actions">
+      @if (saveError()) {
+        <p class="save-error"><mat-icon>error_outline</mat-icon> {{ saveError() }}</p>
+      }
+      <a mat-stroked-button routerLink="/dashboard/counselor-assessments">Cancelar</a>
+      <button mat-flat-button color="primary" (click)="onUpdate()"
+              [disabled]="metaForm.invalid || saving() || lockedByResponses()">
+        <mat-icon>save</mat-icon> {{ saving() ? 'Salvando...' : 'Salvar Alterações' }}
+      </button>
+    </div>
+    } <!-- end @else loading -->
+  </div>
+</div>

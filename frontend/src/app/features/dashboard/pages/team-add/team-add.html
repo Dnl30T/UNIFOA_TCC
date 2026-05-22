@@ -1,0 +1,87 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Entrar em um Time</h2>
+      <p class="page-subtitle">Digite o código do time fornecido pelo gestor.</p>
+    </div>
+    <a mat-flat-button color="primary" routerLink="/dashboard/my-teams">
+      <mat-icon>arrow_back</mat-icon> Meus Times
+    </a>
+  </div>
+
+  <mat-card class="code-card">
+    <mat-card-content>
+      <p class="code-hint">Peça ao gestor o código único do time.</p>
+
+      <div class="code-row">
+        <mat-form-field appearance="outline" class="code-field">
+          <mat-label>Código do time</mat-label>
+          <mat-icon matPrefix>vpn_key</mat-icon>
+          <input matInput
+                 placeholder="Ex: ALPHA01"
+                 [ngModel]="code()"
+                 (ngModelChange)="code.set($event)"
+                 (keydown.enter)="onSearch()"
+                 autocomplete="off"
+                 spellcheck="false" />
+        </mat-form-field>
+        <button mat-flat-button color="primary"
+                [disabled]="!canSearch()"
+                (click)="onSearch()">
+          @if (searching()) {
+            Buscando…
+          } @else {
+            <mat-icon>search</mat-icon> Buscar
+          }
+        </button>
+      </div>
+
+      @if (searchError()) {
+        <div class="error-banner">
+          <mat-icon>error_outline</mat-icon> {{ searchError() }}
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (found(); as team) {
+    <mat-card class="team-result-card" [class.joined]="joined()">
+      <mat-card-content>
+        <div class="team-row">
+          <div class="team-left">
+            <div class="team-icon" [class.active]="joined()">
+              <mat-icon>groups</mat-icon>
+            </div>
+            <div>
+              <p class="team-name">{{ team.name }}</p>
+              @if (joined()) {
+                <span class="joined-label">Você entrou neste time!</span>
+              }
+            </div>
+          </div>
+
+          @if (!joined()) {
+            <button mat-flat-button color="primary" [disabled]="joining()" (click)="join()">
+              @if (joining()) {
+                <mat-spinner diameter="18" />
+              } @else {
+                <mat-icon>login</mat-icon>
+              }
+              Entrar no time
+            </button>
+          } @else {
+            <button mat-stroked-button routerLink="/dashboard/my-teams">
+              <mat-icon>arrow_forward</mat-icon> Ver meus times
+            </button>
+          }
+        </div>
+
+        @if (joinError()) {
+          <div class="error-banner" style="margin-top: 12px;">
+            <mat-icon>error_outline</mat-icon> {{ joinError() }}
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

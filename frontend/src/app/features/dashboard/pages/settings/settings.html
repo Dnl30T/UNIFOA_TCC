@@ -1,0 +1,150 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Configurações</h2>
+      <p class="page-subtitle">Gerencie sua conta, preferências de privacidade e segurança</p>
+    </div>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <mat-tab-group color="primary">
+
+        <!-- Profile Tab -->
+        <mat-tab label="Perfil">
+          <div class="tab-content">
+            <div class="avatar-section">
+              <div class="settings-avatar">{{ avatarInitials }}</div>
+              <button mat-stroked-button type="button">
+                <mat-icon>photo_camera</mat-icon> Alterar Foto
+              </button>
+            </div>
+
+            <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="settings-form">
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Nome Completo</mat-label>
+                  <input matInput formControlName="fullName" />
+                  @if (profileForm.get('fullName')?.hasError('required') && profileForm.get('fullName')?.touched) {
+                    <mat-error>Nome completo obrigatório</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>E-mail</mat-label>
+                  <input matInput formControlName="email" type="email" />
+                  @if (profileForm.get('email')?.hasError('email') && profileForm.get('email')?.touched) {
+                    <mat-error>E-mail inválido</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Cargo / Função</mat-label>
+                  <input matInput formControlName="position" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Empresa</mat-label>
+                  <input matInput formControlName="company" />
+                </mat-form-field>
+              </div>
+
+              @if (profileSuccess()) {
+                <p class="feedback-success"><mat-icon>check_circle</mat-icon> Perfil salvo com sucesso.</p>
+              }
+
+              <div class="form-actions">
+                <button mat-flat-button color="primary" type="submit"
+                  [disabled]="profileForm.invalid || profileLoading()">{{ profileLoading() ? 'Salvando…' : 'Salvar Perfil' }}</button>
+              </div>
+            </form>
+          </div>
+        </mat-tab>
+
+        <!-- Security Tab -->
+        <mat-tab label="Segurança">
+          <div class="tab-content">
+            <h3 class="section-label">Alterar Senha</h3>
+            <mat-divider></mat-divider>
+            <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="settings-form" style="margin-top: 20px">
+              <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Senha Atual</mat-label>
+                <input matInput [type]="hideCurrentPw() ? 'password' : 'text'" formControlName="current" />
+                <button mat-icon-button matSuffix type="button" (click)="hideCurrentPw.set(!hideCurrentPw())">
+                  <mat-icon>{{ hideCurrentPw() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                @if (passwordForm.get('current')?.hasError('required') && passwordForm.get('current')?.touched) {
+                  <mat-error>Senha atual obrigatória</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Nova Senha</mat-label>
+                <input matInput [type]="hideNewPw() ? 'password' : 'text'" formControlName="next" />
+                <button mat-icon-button matSuffix type="button" (click)="hideNewPw.set(!hideNewPw())">
+                  <mat-icon>{{ hideNewPw() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                @if (passwordForm.get('next')?.hasError('minlength') && passwordForm.get('next')?.touched) {
+                  <mat-error>Mínimo 8 caracteres</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Confirmar Nova Senha</mat-label>
+                <input matInput [type]="hideConfirmPw() ? 'password' : 'text'" formControlName="confirm" />
+                <button mat-icon-button matSuffix type="button" (click)="hideConfirmPw.set(!hideConfirmPw())">
+                  <mat-icon>{{ hideConfirmPw() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                @if (passwordForm.hasError('passwordMismatch') && passwordForm.get('confirm')?.touched) {
+                  <mat-error>As senhas não coincidem</mat-error>
+                }
+              </mat-form-field>
+
+              @if (passwordError()) {
+                <p class="feedback-error"><mat-icon>error_outline</mat-icon> {{ passwordError() }}</p>
+              }
+              @if (passwordSuccess()) {
+                <p class="feedback-success"><mat-icon>check_circle</mat-icon> Senha alterada com sucesso.</p>
+              }
+
+              <div class="form-actions">
+                <button mat-flat-button color="primary" type="submit"
+                  [disabled]="passwordForm.invalid || passwordLoading()">{{ passwordLoading() ? 'Alterando…' : 'Alterar Senha' }}</button>
+              </div>
+            </form>
+          </div>
+        </mat-tab>
+
+        <!-- Privacy Tab -->
+        <mat-tab label="Privacidade & LGPD">
+          <div class="tab-content">
+            <h3 class="section-label">Dados & Privacidade</h3>
+            <mat-divider></mat-divider>
+
+            <div class="toggle-row">
+              <div>
+                <p class="toggle-label">Anonimizar Completamente Minhas Respostas</p>
+                <p class="toggle-desc">Suas respostas não serão identificáveis nem pelo terapeuta</p>
+              </div>
+              <mat-slide-toggle [(ngModel)]="privacy.anonymize" color="primary"></mat-slide-toggle>
+            </div>
+
+            <div class="lgpd-notice">
+              <mat-icon>info</mat-icon>
+              <p>De acordo com a LGPD (Lei Geral de Proteção de Dados), você tem o direito de acessar, corrigir ou solicitar a exclusão dos seus dados pessoais. Entre em contato com o controlador de dados para mais informações.</p>
+            </div>
+
+            @if (privacySuccess()) {
+                <p class="feedback-success"><mat-icon>check_circle</mat-icon> Preferências de privacidade salvas.</p>
+            }
+            @if (privacyError()) {
+                <p class="feedback-error"><mat-icon>error_outline</mat-icon> {{ privacyError() }}</p>
+            }
+
+            <div class="form-actions">
+              <button mat-flat-button color="primary" type="button" (click)="onSavePrivacy()" [disabled]="privacyLoading()">Salvar Preferências</button>
+            </div>
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div>

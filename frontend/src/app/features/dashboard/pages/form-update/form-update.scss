@@ -1,0 +1,52 @@
+@use '../../page' as *;
+
+:host { display: block; }
+
+.builder-layout { display: flex; gap: 20px; align-items: flex-start; min-height: calc(100vh - 120px); }
+
+.loading-state { display: flex; justify-content: center; padding: 60px 0; }
+
+.palette {
+  width: 180px; flex-shrink: 0; background: #fff;
+  border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; position: sticky; top: 20px;
+}
+.palette-title { font-weight: 700; font-size: 0.875rem; color: #111827; margin: 0 0 4px; }
+.palette-hint  { font-size: 0.75rem; color: #9ca3af; margin: 0 0 12px; }
+.palette-btn {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px;
+  border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; cursor: pointer;
+  font-size: 0.82rem; color: #374151; margin-bottom: 6px; transition: background 0.15s;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; color: #2e7d32; }
+  &:hover { background: #e8f5e9; border-color: #a7d9a9; }
+}
+
+.canvas-wrap { flex: 1; }
+.meta-card { margin-bottom: 16px; }
+
+.field-card {
+  margin-bottom: 12px;
+  &:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important; }
+  .field-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .field-type-icon { color: #6b7280; font-size: 20px; width: 20px; height: 20px; flex-shrink: 0; }
+  .label-field { flex: 1; min-width: 200px; margin-bottom: -16px; }
+  .field-controls { display: flex; margin-left: auto; }
+}
+
+.options-list { margin-top: 12px; padding-left: 30px; }
+.option-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  .option-bullet { color: #9ca3af; font-size: 18px; width: 18px; height: 18px; }
+  .option-input {
+    flex: 1; border: none; border-bottom: 1px solid #d1d5db; padding: 4px 0;
+    font-size: 0.875rem; outline: none; background: transparent;
+    &:focus { border-bottom-color: #16a34a; }
+  }
+}
+
+.scale-preview { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.scale-dot {
+  width: 36px; height: 36px; border-radius: 50%; border: 2px solid #d1d5db;
+  display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #6b7280;
+}
+
+.builder-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }

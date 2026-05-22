@@ -1,0 +1,136 @@
+.pp-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* ─── Header ──────────────────────────────────────── */
+.pp-header {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.pp-header-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #4f46e5;
+}
+
+.pp-logo .logo-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #4f46e5;
+  letter-spacing: -0.5px;
+}
+
+/* ─── Container ───────────────────────────────────── */
+.pp-container {
+  max-width: 860px;
+  margin: 48px auto;
+  padding: 0 24px 64px;
+}
+
+.pp-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.pp-date {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-bottom: 24px;
+}
+
+/* ─── Sections ────────────────────────────────────── */
+.pp-section {
+  margin: 36px 0;
+
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 12px;
+    padding-top: 8px;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #334155;
+    margin: 16px 0 8px;
+  }
+
+  p {
+    color: #475569;
+    line-height: 1.75;
+    margin-bottom: 12px;
+  }
+
+  ul {
+    margin: 8px 0 12px 20px;
+    padding: 0;
+
+    li {
+      color: #475569;
+      line-height: 1.75;
+      margin-bottom: 6px;
+    }
+  }
+
+  a {
+    color: #4f46e5;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+mat-divider {
+  margin: 8px 0;
+}
+
+.pp-last-updated {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 8px;
+}
+
+/* ─── Footer actions ──────────────────────────────── */
+.pp-footer-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+/* ─── Responsive ──────────────────────────────────── */
+@media (max-width: 600px) {
+  .pp-container {
+    margin: 24px auto;
+    padding: 0 16px 48px;
+  }
+
+  .pp-title {
+    font-size: 1.5rem;
+  }
+}

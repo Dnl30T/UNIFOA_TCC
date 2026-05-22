@@ -1,0 +1,47 @@
+# Backend (Gradle/Spring Boot)
+backend/.gradle
+backend/build/
+backend/bin/
+backend/out/
+backend/.idea
+backend/*.iws
+backend/*.iml
+backend/*.ipr
+
+# Frontend (Angular/Node)
+frontend/node_modules/
+frontend/dist/
+frontend/tmp/
+frontend/out-tsc/
+frontend/bazel-out/
+frontend/.angular/
+
+# Scripts virtualenv
+backend/scripts/lib/
+backend/scripts/lib64
+backend/scripts/bin/
+backend/scripts/include/
+backend/scripts/pyvenv.cfg
+
+# Test results / reports
+frontend/test-results/
+frontend/playwright-report/
+
+# Large/generated artifacts
+*.tar.gz
+*.tar
+*.zip
+*.war
+*.ear
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/

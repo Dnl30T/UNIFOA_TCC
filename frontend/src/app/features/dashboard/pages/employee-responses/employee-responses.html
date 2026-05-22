@@ -1,0 +1,151 @@
+<div class="page" [class.page-split]="isCounselor()">
+
+  <!-- ── Page header ─────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <button mat-icon-button (click)="goBack()" matTooltip="Voltar" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    @if (!loading() && !notFound()) {
+      <div class="hero-row">
+        <div class="avatar-circle">{{ employeeName() | slice:0:2 | uppercase }}</div>
+        <div class="hero-info">
+          <h2 class="page-title">{{ employeeName() }}</h2>
+          <div class="hero-meta">
+            <mat-chip-set>
+              <mat-chip color="primary" highlighted>{{ formTitle() }}</mat-chip>
+              @if (totalScore() !== null) {
+                <mat-chip highlighted>Pontuação: {{ totalScore() }}</mat-chip>
+              }
+              @if (burnoutRisk()) {
+                <mat-chip highlighted>Risco burnout: {{ burnoutRisk() }}</mat-chip>
+              }
+              @if (responseStatus() === 'NO_RESPONSE') {
+                <mat-chip color="warn" highlighted>Sem resposta</mat-chip>
+              }
+            </mat-chip-set>
+            <span class="submitted-date">
+              <mat-icon>schedule</mat-icon>{{ submittedAt() }}
+            </span>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <h2 class="page-title">Respostas do Funcionário</h2>
+    }
+  </div>
+
+  <!-- ── States ──────────────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="loading-center">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (notFound()) {
+    <div class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <p>Nenhuma resposta encontrada ou dados de navegação ausentes.</p>
+      <button mat-stroked-button (click)="goBack()">Voltar para relatórios</button>
+    </div>
+  } @else {
+    <div class="content-layout" [class.has-eval]="isCounselor()">
+
+      <!-- ── Left: answers column ──────────────────────────────────────── -->
+      <div class="answers-col">
+        <p class="answers-count">{{ answers().length }} pergunta(s) respondida(s)</p>
+
+        <div class="answers-list">
+          @for (row of answers(); track $index) {
+            <mat-card class="answer-card" [attr.data-type]="row.field.type">
+              <mat-card-content>
+                <div class="card-top">
+                  <span class="q-index">{{ row.index }}</span>
+                  <span class="type-badge type-{{ row.field.type | lowercase }}">{{ row.typeLabel }}</span>
+                </div>
+                <div class="question-text">{{ row.questionText }}</div>
+                <mat-divider></mat-divider>
+                <div class="answer-value">
+                  @switch (row.field.type) {
+                    @case ('BOOLEAN') {
+                      <mat-chip-set>
+                        <mat-chip [class.chip-yes]="row.labels[0] === 'Sim'" [class.chip-no]="row.labels[0] === 'Não'" highlighted>
+                          <mat-icon>{{ row.labels[0] === 'Sim' ? 'check_circle' : 'cancel' }}</mat-icon>
+                          {{ row.labels[0] }}
+                        </mat-chip>
+                      </mat-chip-set>
+                    }
+                    @case ('SCALE') {
+                      <div class="scale-answer">
+                        <span class="scale-value">{{ row.labels[0] }}</span>
+                        <div class="scale-bar-wrap">
+                          <div class="scale-bar-fill"
+                            [style.width.%]="(row.value / (row.field.scaleMax || 10)) * 100">
+                          </div>
+                        </div>
+                        <span class="scale-max">/ {{ row.field.scaleMax || 10 }}</span>
+                      </div>
+                    }
+                    @case ('LIKERT') {
+                      <mat-chip-set>
+                        <mat-chip class="chip-likert" highlighted>{{ row.labels[0] }}</mat-chip>
+                      </mat-chip-set>
+                    }
+                    @case ('SINGLE_CHOICE') {
+                      <mat-chip-set>
+                        <mat-chip class="chip-choice" highlighted>
+                          <mat-icon>radio_button_checked</mat-icon>
+                          {{ row.labels[0] }}
+                        </mat-chip>
+                      </mat-chip-set>
+                    }
+                    @case ('MULTIPLE_CHOICE') {
+                      <mat-chip-set>
+                        @for (label of row.labels; track $index) {
+                          <mat-chip class="chip-choice" highlighted>
+                            <mat-icon>check_box</mat-icon>
+                            {{ label }}
+                          </mat-chip>
+                        }
+                      </mat-chip-set>
+                    }
+                    @case ('RANKING') {
+                      <ol class="ranked-list">
+                        @for (label of row.labels; track $index) {
+                          <li>{{ label }}</li>
+                        }
+                      </ol>
+                    }
+                    @case ('MATRIX') {
+                      <ul class="matrix-list">
+                        @for (label of row.labels; track $index) {
+                          <li>{{ label }}</li>
+                        }
+                      </ul>
+                    }
+                    @default {
+                      <p class="text-answer">{{ row.labels[0] }}</p>
+                    }
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </div>
+
+      <!-- ── Right: evaluation panel (counselor only) ──────────────────── -->
+      @if (isCounselor()) {
+        <div class="eval-col">
+          <div class="eval-col-header">
+            <mat-icon>psychology</mat-icon>
+            <span>Avaliação Clínica — <strong>{{ employeeName() }}</strong></span>
+          </div>
+          <app-therapist-evaluation-form
+            [formId]="currentFormId()"
+            [employeeId]="currentEmployeeId()">
+          </app-therapist-evaluation-form>
+        </div>
+      }
+
+    </div>
+  }
+</div>

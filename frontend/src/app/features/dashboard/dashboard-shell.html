@@ -1,0 +1,76 @@
+<div class="shell" [class.sidebar-collapsed]="!sidebarOpen()">
+
+  <!-- ── Sidebar ──────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-placeholder">
+        <span class="logo-text">PsyTrack</span>
+      </div>
+      <button mat-icon-button class="toggle-btn" (click)="toggleSidebar()">
+        <mat-icon>{{ sidebarOpen() ? 'menu_open' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+
+    <nav class="nav">
+      <p class="nav-section-label">MENU</p>
+
+      @for (item of navItems(); track item.route) {
+        <a
+          class="nav-item"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [matTooltip]="sidebarOpen() ? '' : item.label"
+          matTooltipPosition="right"
+        >
+          <mat-icon>{{ item.icon }}</mat-icon>
+          @if (sidebarOpen()) {
+            <span>{{ item.label }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="nav-item" (click)="logout()" style="cursor:pointer">
+        <mat-icon>logout</mat-icon>
+        @if (sidebarOpen()) { <span>Sair</span> }
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── Main ────────────────────────────────────────────── -->
+  <div class="main-area">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button mat-icon-button class="mobile-toggle" (click)="toggleSidebar()">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <div class="topbar-greeting">
+          <mat-icon>wb_sunny</mat-icon>
+          <span>Bom dia, {{ username() ?? 'Usuário' }}</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Buscar…" />
+        </div>
+        <button mat-icon-button>
+          <mat-icon>notifications_none</mat-icon>
+        </button>
+        <div class="avatar">{{ (username() ?? 'U')[0].toUpperCase() }}</div>
+        <span class="avatar-name">{{ username() ?? 'User' }}</span>
+        <mat-icon class="avatar-caret">expand_more</mat-icon>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="page-content">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>

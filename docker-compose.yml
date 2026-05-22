@@ -1,0 +1,106 @@
+services:
+
+  # ── Databases ────────────────────────────────────────────────────────────────
+
+  db:
+    image: postgres:16-alpine
+    container_name: unformulieren-db
+    environment:
+      POSTGRES_DB: unformulieren
+      POSTGRES_USER: unformulieren
+      POSTGRES_PASSWORD: unformulieren
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unformulieren -d unformulieren"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  scylladb:
+    image: scylladb/scylla:5.4
+    container_name: unformulieren-scylla
+    command: --developer-mode=1 --overprovisioned=1
+    ports:
+      - "9042:9042"
+      - "9160:9160"
+    volumes:
+      - scylla_data:/var/lib/scylla
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' 2>/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
+
+  scylladb-init:
+    image: scylladb/scylla:5.4
+    container_name: unformulieren-scylla-init
+    depends_on:
+      scylladb:
+        condition: service_healthy
+    volumes:
+      - ./backend/src/main/resources/db/scylla/schema.cql:/schema.cql:ro
+    entrypoint: ["/bin/bash", "-c", "cqlsh scylladb -f /schema.cql && echo 'ScyllaDB schema initialized'"]
+    restart: "no"
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.32.0
+    container_name: unformulieren-azurite
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --location /data --loose
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - azurite_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 10000 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── Application ──────────────────────────────────────────────────────────────
+
+  backend:
+    build:
+      context: ./backend
+    container_name: unformulieren-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      scylladb-init:
+        condition: service_completed_successfully
+      azurite:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: unformulieren
+      DB_USER: unformulieren
+      DB_PASSWORD: unformulieren
+      SCYLLA_HOST: scylladb
+      SCYLLA_PORT: 9042
+      SCYLLA_KEYSPACE: psytrack
+      SCYLLA_DATACENTER: datacenter1
+      JWT_SECRET: dev-secret-key-for-docker-compose-min32chars
+      AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;"
+      AZURE_STORAGE_CONTAINER: profile-pictures
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: unformulieren-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  scylla_data:
+  azurite_data:

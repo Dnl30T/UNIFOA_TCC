@@ -1,0 +1,13 @@
+@use '../../auth-layout' as *;
+
+.forgot-link {
+  display: block;
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: #2e7d32;
+  text-decoration: underline;
+
+  &:hover {
+    color: #1b5e20;
+  }
+}

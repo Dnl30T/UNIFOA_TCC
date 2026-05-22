@@ -1,0 +1,67 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">My Teams</h2>
+      <p class="page-subtitle">Times que você está monitorando</p>
+    </div>
+    <a mat-flat-button color="primary" routerLink="/dashboard/teams/add">
+      <mat-icon>add</mat-icon> Adicionar Time
+    </a>
+  </div>
+
+  <!-- Loading state -->
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading() && teams().length === 0) {
+    <div class="empty-pool">
+      <mat-icon>group_add</mat-icon>
+      <p>Nenhum time no seu pool ainda.</p>
+      <a mat-stroked-button color="primary" routerLink="/dashboard/teams/add">
+        <mat-icon>add</mat-icon> Adicionar time
+      </a>
+    </div>
+  }
+
+  <!-- Teams Grid with Step Indicators and Action Cards -->
+  @if (!loading() && teams().length > 0) {
+    <div class="teams-grid">
+      @for (team of teams(); track team.id) {
+        <mat-card class="team-card">
+          <mat-card-header>
+            <div mat-card-avatar class="card-avatar">
+              <mat-icon>groups</mat-icon>
+            </div>
+            <mat-card-title>{{ team.name }}</mat-card-title>
+            <mat-card-subtitle>
+              <span class="form-chip" [class]="team.formReceived ? 'received' : 'waiting'">
+                <mat-icon>{{ team.formReceived ? 'check_circle' : 'schedule' }}</mat-icon>
+                {{ team.formReceived ? 'Formulário recebido' : 'Aguardando' }}
+              </span>
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Step Indicator showing workflow progress -->
+            <div class="team-steps">
+              <app-step-indicator [steps]="getStepsForTeam(team)"></app-step-indicator>
+            </div>
+
+            <!-- Action Card for team actions -->
+            <div class="team-actions-section">
+              <app-action-card
+                [actions]="getTeamActions(team)"
+                (actionTriggered)="onTeamAction($event, team)"
+              ></app-action-card>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+
+</div>

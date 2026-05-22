@@ -1,0 +1,65 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: unformulieren-db
+    environment:
+      POSTGRES_DB: unformulieren
+      POSTGRES_USER: unformulieren
+      POSTGRES_PASSWORD: unformulieren
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unformulieren -d unformulieren"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  scylladb:
+    image: scylladb/scylla:5.4
+    container_name: unformulieren-scylla
+    command: --developer-mode=1 --overprovisioned=1
+    ports:
+      - "9042:9042"
+      - "9160:9160"
+    volumes:
+      - scylla_data:/var/lib/scylla
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' 2>/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
+
+  scylladb-init:
+    image: scylladb/scylla:5.4
+    container_name: unformulieren-scylla-init
+    depends_on:
+      scylladb:
+        condition: service_healthy
+    volumes:
+      - ./src/main/resources/db/scylla:/scylla:ro
+    entrypoint: ["/bin/bash", "-c", "cqlsh scylladb -f /scylla/schema.cql && echo 'ScyllaDB schema initialized'"]
+    restart: "no"
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.32.0
+    container_name: unformulieren-azurite
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --location /data --loose
+    ports:
+      - "10000:10000"   # Blob service
+      - "10001:10001"   # Queue service
+      - "10002:10002"   # Table service
+    volumes:
+      - azurite_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 10000 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+  scylla_data:
+  azurite_data:

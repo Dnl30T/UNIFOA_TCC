@@ -1,0 +1,92 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$psytrack-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$green-palette,
+  ),
+  typography: (
+    brand-family: 'Inter, sans-serif',
+    plain-family: 'Inter, sans-serif',
+  ),
+));
+
+:root {
+  @include mat.all-component-themes($psytrack-theme);
+
+  /* Force all Material cards to pure white regardless of theme surface color */
+  --mdc-elevated-card-container-color: #ffffff;
+  --mdc-outlined-card-container-color: #ffffff;
+  --mdc-filled-card-container-color: #ffffff;
+
+  /* Override form field focus colors — neutral gray instead of theme green */
+  --mdc-outlined-text-field-outline-color: #d1d5db;
+  --mdc-outlined-text-field-hover-outline-color: #9ca3af;
+  --mdc-outlined-text-field-focus-outline-color: #6b7280;
+  --mdc-outlined-text-field-label-text-color: #6b7280;
+  --mdc-outlined-text-field-focus-label-text-color: #374151;
+  --mdc-outlined-text-field-caret-color: #374151;
+  --mdc-filled-text-field-container-color: #f3f4f6;
+  --mdc-filled-text-field-active-indicator-color: #9ca3af;
+  --mdc-filled-text-field-hover-active-indicator-color: #6b7280;
+  --mdc-filled-text-field-focus-active-indicator-color: #374151;
+  --mdc-filled-text-field-label-text-color: #6b7280;
+  --mdc-filled-text-field-focus-label-text-color: #374151;
+  --mdc-filled-text-field-caret-color: #374151;
+  --mdc-filled-text-field-input-text-color: #111827;
+  --mat-select-focused-arrow-color: #374151;
+  --mat-form-field-focus-select-arrow-color: #374151;
+  --mat-select-enabled-arrow-color: #6b7280;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background: #fff;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* ── Override Angular Material green theme on form fields ────────────────── */
+/* Filled fields */
+.mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: #f3f4f6 !important;
+}
+.mdc-text-field--filled .mdc-line-ripple::before,
+.mdc-text-field--filled .mdc-line-ripple::after {
+  border-bottom-color: #6b7280 !important;
+}
+/* Outlined fields — border and label */
+.mdc-notched-outline__leading,
+.mdc-notched-outline__notch,
+.mdc-notched-outline__trailing {
+  border-color: #d1d5db !important;
+}
+.mat-mdc-form-field:not(.mat-form-field-disabled):hover .mdc-notched-outline__leading,
+.mat-mdc-form-field:not(.mat-form-field-disabled):hover .mdc-notched-outline__notch,
+.mat-mdc-form-field:not(.mat-form-field-disabled):hover .mdc-notched-outline__trailing {
+  border-color: #9ca3af !important;
+}
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #374151 !important;
+}
+.mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: #374151 !important;
+}
+/* Select arrow */
+.mat-mdc-select-arrow svg {
+  fill: #6b7280 !important;
+}

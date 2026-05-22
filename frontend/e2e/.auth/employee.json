@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:4200",
+      "localStorage": [
+        {
+          "name": "psytrack_token",
+          "value": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJlbXBfZXZlIiwicm9sZSI6IkVNUExPWUVFIiwiaWF0IjoxNzc5MzkxMjQwLCJleHAiOjE3Nzk0Nzc2NDB9.kPdO1c9RdH_qYcnPseeBhHWDdthnkXC4kYQNk2qxoyQRNROTpMTkm6SZAkQUSe_h"
+        }
+      ]
+    }
+  ]
+}

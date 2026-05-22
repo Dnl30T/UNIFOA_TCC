@@ -1,0 +1,79 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Visão do Time</h2>
+    </div>
+    <div class="page-header-actions">
+      @if (teamCode()) {
+        <div class="team-code-badge">
+          <span class="team-code-label">Código do time</span>
+          <span class="team-code-value">{{ teamCode() }}</span>
+          <button mat-icon-button
+                  [matTooltip]="codeCopied() ? 'Copiado!' : 'Copiar código'"
+                  (click)="copyCode()">
+            <mat-icon>{{ codeCopied() ? 'check' : 'content_copy' }}</mat-icon>
+          </button>
+        </div>
+      }
+      @if (hasTeam()) {
+        <button mat-stroked-button [matMenuTriggerFor]="filterMenu">
+          <mat-icon>filter_list</mat-icon> {{ filterLabel() }}
+        </button>
+        <mat-menu #filterMenu="matMenu">
+          <button mat-menu-item (click)="setFilter('all')">Todos</button>
+          <button mat-menu-item (click)="setFilter('responded')">Responderam</button>
+          <button mat-menu-item (click)="setFilter('pending')">Pendentes</button>
+        </mat-menu>
+      }
+    </div>
+  </div>
+
+  @if (hasTeam() === false) {
+    <div class="no-team-state">
+      <mat-icon class="no-team-icon">group_add</mat-icon>
+      <h3>Você ainda não tem um time</h3>
+      <p>Crie um time para começar a gerenciar seus colaboradores.</p>
+      <div class="create-team-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Nome do time</mat-label>
+          <input matInput [ngModel]="newTeamName()" (ngModelChange)="newTeamName.set($event)"
+                 placeholder="Ex: Equipe Alpha" (keydown.enter)="createTeam()" />
+        </mat-form-field>
+        @if (createError()) {
+          <p class="create-error">{{ createError() }}</p>
+        }
+        <button mat-flat-button color="primary" [disabled]="!newTeamName().trim() || creating()" (click)="createTeam()">
+          @if (creating()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <mat-icon>add</mat-icon>
+          }
+          Criar time
+        </button>
+      </div>
+    </div>
+  } @else if (hasTeam() === true) {
+    <div class="members-grid">
+      @for (m of filteredMembers(); track m.name) {
+        <mat-card class="member-card">
+          <mat-card-content>
+            <div class="member-header">
+              <div class="avatar" [style.background]="avatarColor(m.responded)">{{ m.initials }}</div>
+              <div class="member-info">
+                <p class="member-name">{{ m.name }}</p>
+                <p class="member-role">{{ m.jobTitle }}</p>
+              </div>
+              <span class="status-chip" [class]="m.responded ? 'responded' : 'pending'">
+                {{ statusLabel(m.responded) }}
+              </span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      @if (filteredMembers().length === 0) {
+        <p class="empty-state">Nenhum colaborador encontrado.</p>
+      }
+    </div>
+  }
+</div>

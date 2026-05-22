@@ -1,0 +1,186 @@
+<div class="dash-page">
+  <div class="title-row">
+    <h2 class="page-title">Dashboard</h2>
+    @if (canFilterTeam()) {
+      <mat-form-field appearance="outline" class="team-filter">
+        <mat-label>Time</mat-label>
+        <mat-select [ngModel]="selectedTeamId()" (ngModelChange)="onTeamChange($event)">
+          @for (team of teams(); track team.id) {
+            <mat-option [value]="team.id">{{ team.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+  </div>
+
+  <!-- ── Stat Cards ─────────────────────────────────────── -->
+  <div class="stat-cards">
+    @for (card of stats(); track card.title) {
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon" [style.background]="card.iconBg">
+            <mat-icon [style.color]="card.iconColor">{{ card.icon }}</mat-icon>
+          </div>
+          <div class="stat-info">
+            <p class="stat-title">{{ card.title }}</p>
+            <p class="stat-value">{{ card.value }}</p>
+            <p class="stat-trend" [class.positive]="card.trend > 0" [class.negative]="card.trend < 0">
+              <mat-icon>{{ card.trend > 0 ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+              {{ card.trend | number:'1.1-1' }}%
+              <span>Últimos 7 dias</span>
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  <!-- ── Charts Row ─────────────────────────────────────── -->
+  <div class="charts-row">
+
+    <!-- Burnout Trend (wave placeholder) -->
+    <mat-card class="chart-card trend-card">
+      <mat-card-content>
+        <div class="chart-header">
+          <h3>Tendência de Score de Burnout</h3>
+          <button mat-stroked-button class="period-btn">Este Mês</button>
+        </div>
+        <div class="wave-chart">
+          <svg viewBox="0 0 700 180" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2e7d32" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#2e7d32" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- Area fill -->
+            <path [attr.d]="'M' + burnoutTrend().linePoints.split(' ')[0] + ' C' + burnoutTrend().linePoints + ' L700,180 L0,180 Z'"
+                  fill="url(#g1)"/>
+            <!-- Line -->
+            <path [attr.d]="'M' + burnoutTrend().linePoints"
+                  fill="none" stroke="#2e7d32" stroke-width="2.5"/>
+          </svg>
+          <div class="wave-x-labels">
+            @for (label of burnoutTrend().labels; track label) {
+              <span>{{ label }}</span>
+            }
+          </div>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-dot" style="background:#2e7d32"></span> Score Médio
+          <span class="legend-dot" style="background:#f59e0b; margin-left:12px"></span> Nível de Risco
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Risk Distribution donut -->
+    <mat-card class="chart-card donut-card">
+      <mat-card-content>
+        <h3>Distribuição de Risco</h3>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 120 120" class="donut-svg">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#2e7d32" stroke-width="16"
+              [attr.stroke-dasharray]="getStrokeDasharray(riskDistribution()[0].pct)"
+              [attr.stroke-dashoffset]="getStrokeDashoffset(0)"
+              transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#f59e0b" stroke-width="16"
+              [attr.stroke-dasharray]="getStrokeDasharray(riskDistribution()[1].pct)"
+              [attr.stroke-dashoffset]="getStrokeDashoffset(riskDistribution()[0].pct)"
+              transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#c62828" stroke-width="16"
+              [attr.stroke-dasharray]="getStrokeDasharray(riskDistribution()[2].pct)"
+              [attr.stroke-dashoffset]="getStrokeDashoffset(riskDistribution()[0].pct + riskDistribution()[1].pct)"
+              transform="rotate(-90 60 60)"/>
+          </svg>
+        </div>
+        <div class="donut-legend">
+          @for (seg of riskDistribution(); track seg.label) {
+            <div class="donut-legend-row">
+              <span class="legend-dot" [style.background]="seg.color"></span>
+              <span class="legend-label">{{ seg.label }}</span>
+              <span class="legend-pct">{{ seg.pct }}%</span>
+              <span class="legend-trend positive">
+                <mat-icon>arrow_upward</mat-icon>
+              </span>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+  <!-- ── Bottom Row ─────────────────────────────────────── -->
+  <div class="bottom-row">
+
+    <!-- Risk Radar placeholder -->
+    <mat-card class="radar-card">
+      <mat-card-content>
+        <h3>Visão de Risco</h3>
+        <div class="radar-wrap">
+          <svg viewBox="0 0 220 220" class="radar-svg">
+            <defs>
+              <polygon id="hex" points="110,20 200,65 200,155 110,200 20,155 20,65"/>
+            </defs>
+            <!-- Grid rings -->
+            @for (r of [0.2,0.4,0.6,0.8,1.0]; track r) {
+              <polygon
+                [attr.points]="'110,'+(110-90*r)+' '+(110+78*r)+','+(110-45*r)+' '+(110+78*r)+','+(110+45*r)+' 110,'+(110+90*r)+' '+(110-78*r)+','+(110+45*r)+' '+(110-78*r)+','+(110-45*r)"
+                fill="none" stroke="#e5e7eb" stroke-width="1"/>
+            }
+            <!-- Data polygon -->
+            <polygon [attr.points]="riskRadarPoints()"
+              fill="#2e7d32" fill-opacity="0.15" stroke="#2e7d32" stroke-width="2"/>
+            <!-- Labels -->
+            <text x="110" y="14" text-anchor="middle" font-size="9" fill="#6b7280">Estresse</text>
+            <text x="208" y="68" text-anchor="start" font-size="9" fill="#6b7280">Fadiga</text>
+            <text x="208" y="165" text-anchor="start" font-size="9" fill="#6b7280">Desengajamento</text>
+            <text x="110" y="214" text-anchor="middle" font-size="9" fill="#6b7280">Sobrecarga</text>
+            <text x="12" y="165" text-anchor="end" font-size="9" fill="#6b7280">Isolamento</text>
+            <text x="12" y="68" text-anchor="end" font-size="9" fill="#6b7280">Sono</text>
+          </svg>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-dot" style="background:#2e7d32"></span> Análise Publicada
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Latest Activity -->
+    <mat-card class="activity-card">
+      <mat-card-content>
+        <h3>Última Atividade</h3>
+        <div class="activity-list">
+          @if (activities().length === 0) {
+            <p class="activity-desc">Nenhuma atividade encontrada para o escopo selecionado.</p>
+          } @else {
+            @for (tx of activities(); track tx.name + tx.date + tx.description) {
+              <div class="activity-item">
+                <div class="activity-icon" [style.background]="tx.iconBg">
+                  <mat-icon>{{ tx.icon }}</mat-icon>
+                </div>
+                <div class="activity-info">
+                  <p class="activity-name">{{ tx.name }}</p>
+                  <p class="activity-desc">{{ tx.description }}</p>
+                </div>
+                <div class="activity-meta">
+                  <span class="status-badge" [class]="tx.status">{{ tx.status }}</span>
+                  <p class="activity-amount" [class.positive]="tx.positive" [class.negative]="!tx.positive">
+                    {{ tx.amount }}
+                  </p>
+                  <p class="activity-date">{{ tx.date }}</p>
+                </div>
+              </div>
+              <mat-divider></mat-divider>
+            }
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>

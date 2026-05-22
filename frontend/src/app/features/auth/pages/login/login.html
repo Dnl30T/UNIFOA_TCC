@@ -1,0 +1,79 @@
+<div class="auth-page">
+  <!-- Left: Form -->
+  <div class="form-side">
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-title">
+          <h1>Bem-vindo de volta</h1>
+          <p>Entre na sua conta</p>
+        </div>
+        <a routerLink="/auth/register" class="signup-link">Cadastre-se</a>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <!-- Username -->
+        <label class="field-label">Usuário</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput formControlName="email" placeholder="seu_usuario" type="text" />
+          @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+            <mat-error>Usuário obrigatório</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Password -->
+        <label class="field-label">Senha</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input
+            matInput
+            formControlName="password"
+            [type]="hidePassword() ? 'password' : 'text'"
+            placeholder="Sua senha"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+            [attr.aria-label]="hidePassword() ? 'Mostrar senha' : 'Ocultar senha'"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+            <mat-error>Senha obrigatória</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Submit row -->
+        <div class="submit-row">
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            class="submit-btn"
+            [disabled]="form.invalid || loading()"
+          >
+            {{ loading() ? 'ENTRANDO…' : 'ENTRAR' }}
+          </button>
+
+          <mat-checkbox formControlName="rememberMe" class="remember-check">
+            Lembrar-me
+          </mat-checkbox>
+        </div>
+
+        @if (errorMsg()) {
+          <p class="auth-error">{{ errorMsg() }}</p>
+        }
+
+        <a routerLink="/auth/forgot-password" class="forgot-link">Esqueceu sua senha?</a>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right: Illustration -->
+  <div class="illustration-side">
+    <div class="blob-bg"></div>
+    <div class="illustration-content">
+      <mat-icon class="illus-icon">psychology</mat-icon>
+    </div>
+  </div>
+</div>

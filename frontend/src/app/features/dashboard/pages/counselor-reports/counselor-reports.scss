@@ -1,0 +1,421 @@
+@use '../../page' as *;
+
+// ──── Form Readiness Card (Tab 1) ──────────────────────────────────────
+.form-readiness-card {
+  margin-bottom: 24px;
+
+  mat-card-header {
+    margin-bottom: 20px;
+  }
+
+  .card-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #d1fae5;
+    border-radius: 50%;
+    margin-right: 16px;
+
+    mat-icon {
+      color: #15803d;
+    }
+  }
+
+  mat-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  mat-card-subtitle {
+    margin-top: 4px;
+  }
+}
+
+.form-readiness-steps {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.form-readiness-actions {
+  margin: 20px 0;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.report-name-input-section {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+
+  .report-name-field {
+    flex: 1;
+    max-width: 400px;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    .report-name-field {
+      max-width: 100%;
+    }
+  }
+}
+
+.form-readiness-reports {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .reports-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+      background-color: #f3f4f6;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #111827;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.9rem;
+    }
+
+    tr:hover {
+      background-color: #f9fafb;
+    }
+  }
+}
+
+// ──── Evaluations Tab (Tab 2) ─────────────────────────────────────────
+.evaluations-filter {
+  margin-bottom: 24px;
+}
+
+.batch-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+.members-table-section {
+  margin-top: 24px;
+}
+
+.members-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// ──── Member Card ─────────────────────────────────────────────────────
+.member-card {
+  padding: 14px 18px !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
+  transition: border-color 0.2s;
+
+  &.responded {
+    border-color: #bfdbfe !important;
+    background: #f0f7ff;
+  }
+
+  &.evaluated {
+    border-color: #bbf7d0 !important;
+    background: #f0fdf4;
+  }
+}
+
+.member-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.member-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  strong {
+    font-size: 0.92rem;
+    color: #111827;
+  }
+
+  .job-title {
+    font-size: 0.78rem;
+    color: #9ca3af;
+  }
+}
+
+.member-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.response-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+
+  mat-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+  }
+
+  &.pending {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+
+  &.responded {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  &.evaluated {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &.no_response {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  &.draft {
+    background: #fff7ed;
+    color: #9a3412;
+  }
+
+  &.done {
+    background: #ecfeff;
+    color: #155e75;
+  }
+
+  &.submitted {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &.none {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+
+  // team-report chips
+  &.low {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &.moderate {
+    background: #fef9c3;
+    color: #854d0e;
+  }
+
+  &.high {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  &.created {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+
+  &.active {
+    background: #d1fae5;
+    color: #15803d;
+  }
+
+  &.ended {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+}
+
+.result-info {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 20px;
+  font-size: 0.82rem;
+
+  .label {
+    color: #6b7280;
+    margin-right: 2px;
+  }
+}
+
+.generate-form {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.risk-preview {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-bottom: 16px;
+
+  strong {
+    color: #111827;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 0;
+  color: #9ca3af;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+.score-value {
+  font-weight: 600;
+}
+
+.batch-message {
+  margin: 12px 0 0 0;
+  padding: 12px;
+  font-size: 0.84rem;
+  color: #1e40af;
+  background-color: #eff6ff;
+  border-radius: 4px;
+  border-left: 4px solid #3b82f6;
+}
+
+.analysis-feedback {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: #475569;
+  padding: 8px;
+  background-color: #f1f5f9;
+  border-radius: 4px;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+
+  mat-icon {
+    color: #dc2626;
+  }
+}
+
+.members-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+
+  mat-icon {
+    color: #6366f1;
+  }
+
+  .members-count {
+    margin-left: auto;
+    font-weight: 400;
+    color: #9ca3af;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .members-cards {
+    gap: 8px;
+  }
+
+  .member-card {
+    padding: 12px 16px !important;
+  }
+
+  .member-meta {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+

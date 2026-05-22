@@ -1,0 +1,259 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">{{ assessment().title }}</h2>
+      <p class="page-subtitle">
+        @if (isEmployee()) {
+          Conclua e envie sua avaliação
+        } @else {
+          Visualização — como visto pelos respondentes
+        }
+        @if (isActive()) {
+          <span class="status-chip active">ACTIVE</span>
+        } @else if (assessment().status) {
+          <span class="status-chip draft">{{ assessment().status }}</span>
+        }
+      </p>
+    </div>
+    <div class="action-row">
+      @if (isEmployee()) {
+        <a mat-stroked-button routerLink="/dashboard/my-assessments">
+          <mat-icon>arrow_back</mat-icon> Voltar
+        </a>
+      } @else {
+        <a mat-stroked-button routerLink="/dashboard/counselor-assessments">
+          <mat-icon>arrow_back</mat-icon> Voltar
+        </a>
+        @if (canPublish()) {
+          <button mat-flat-button color="primary" (click)="onPublish()">
+            <mat-icon>send</mat-icon> Publicar para Times
+          </button>
+        }
+        @if (canClose()) {
+          <button mat-flat-button color="warn" (click)="onClose()">
+            <mat-icon>lock</mat-icon> Fechar Formulário
+          </button>
+        }
+      }
+    </div>
+  </div>
+
+  @if (alreadyAnswered()) {
+    <div class="publish-success">
+      <mat-icon>check_circle</mat-icon>
+      Você já respondeu este formulário.
+    </div>
+  }
+
+  @if (submitSuccess()) {
+    <div class="publish-success">
+      <mat-icon>check_circle</mat-icon>
+      Respostas enviadas com sucesso!
+    </div>
+  }
+
+  @if (submitError()) {
+    <div class="publish-error">
+      <mat-icon>error_outline</mat-icon> {{ submitError() }}
+    </div>
+  }
+
+  <mat-card class="viewer-intro">
+    <mat-card-content>
+      <p>{{ assessment().description }}</p>
+    </mat-card-content>
+  </mat-card>
+
+  @for (field of fields(); track field.id; let i = $index) {
+    <mat-card class="viewer-field">
+      <mat-card-content>
+        <p class="viewer-label">
+          {{ i + 1 }}. {{ field.label }}
+          @if (field.required) {
+            <span class="required-mark">*</span>
+          }
+        </p>
+
+        @switch (field.type) {
+          @case ('TEXT') {
+            <mat-form-field appearance="outline" style="width:100%">
+              <input matInput placeholder="Sua resposta"
+                     [disabled]="!isEmployee() || submitSuccess()"
+                     [value]="getTextAnswer(field.id)"
+                     (input)="setTextAnswer(field.id, $any($event.target).value)" />
+            </mat-form-field>
+          }
+          @case ('LONG_TEXT') {
+            <mat-form-field appearance="outline" style="width:100%">
+              <textarea matInput rows="4" placeholder="Sua resposta"
+                        [disabled]="!isEmployee() || submitSuccess()"
+                        [value]="getTextAnswer(field.id)"
+                        (input)="setTextAnswer(field.id, $any($event.target).value)"></textarea>
+            </mat-form-field>
+          }
+          @case ('NUMERIC') {
+            <mat-form-field appearance="outline" style="width:200px">
+              <input matInput type="number" placeholder="0"
+                     [disabled]="!isEmployee() || submitSuccess()"
+                     [ngModel]="getAnswer(field.id)"
+                     (ngModelChange)="setAnswer(field.id, $event)" />
+            </mat-form-field>
+          }
+          @case ('BOOLEAN') {
+            <div class="bool-row">
+              <button class="bool-btn yes"
+                      [class.selected]="getAnswer(field.id) === 1"
+                      [disabled]="!isEmployee() || submitSuccess()"
+                      (click)="setAnswer(field.id, 1)">Sim</button>
+              <button class="bool-btn no"
+                      [class.selected]="getAnswer(field.id) === 0 && answers().has(field.id)"
+                      [disabled]="!isEmployee() || submitSuccess()"
+                      (click)="setAnswer(field.id, 0)">Não</button>
+            </div>
+          }
+          @case ('DATE') {
+            <mat-form-field appearance="outline" style="width:240px">
+              <input matInput type="date"
+                     [disabled]="!isEmployee() || submitSuccess()"
+                     [value]="getTextAnswer(field.id)"
+                     (input)="setTextAnswer(field.id, $any($event.target).value)" />
+            </mat-form-field>
+          }
+          @case ('SCALE') {
+            <div class="scale-row">
+              @for (n of scaleRange(field); track n) {
+                <button class="scale-btn"
+                        [class.selected]="getAnswer(field.id) === n"
+                        [disabled]="!isEmployee() || submitSuccess()"
+                        (click)="setAnswer(field.id, n)">{{ n }}</button>
+              }
+            </div>
+            <div class="scale-row-labels">
+              <span>{{ field.scaleMinLabel }}</span>
+              <span>{{ field.scaleMaxLabel }}</span>
+            </div>
+          }
+          @case ('SLIDER') {
+            <div class="slider-row">
+              <span>{{ field.sliderMin }}</span>
+              <mat-slider [min]="field.sliderMin" [max]="field.sliderMax" [step]="field.sliderStep"
+                          [disabled]="!isEmployee() || submitSuccess()" style="flex:1">
+                <input matSliderThumb
+                       [value]="getAnswer(field.id)"
+                       (valueChange)="setAnswer(field.id, $event)" />
+              </mat-slider>
+              <span>{{ field.sliderMax }}</span>
+            </div>
+          }
+          @case ('LIKERT') {
+            <div class="likert-row">
+              @for (opt of field.options; track opt; let li = $index) {
+                <div class="likert-item"
+                     [class.selected]="getAnswer(field.id) === li + 1"
+                     (click)="isEmployee() && !submitSuccess() && setAnswer(field.id, li + 1)">
+                  <div class="likert-circle">{{ li + 1 }}</div>
+                  <span>{{ opt }}</span>
+                </div>
+              }
+            </div>
+          }
+          @case ('SINGLE_CHOICE') {
+            @for (opt of field.options; track opt; let si = $index) {
+              <div class="choice-row"
+                   (click)="isEmployee() && !submitSuccess() && setAnswer(field.id, si)">
+                <mat-icon>{{ getAnswer(field.id) === si && answers().has(field.id) ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
+                <span>{{ opt }}</span>
+              </div>
+            }
+          }
+          @case ('MULTIPLE_CHOICE') {
+            @for (opt of field.options; track opt; let ci = $index) {
+              <div class="choice-row"
+                   [class.choice-selected]="isChecked(field.id, ci)"
+                   (click)="isEmployee() && !submitSuccess() && toggleCheckbox(field.id, ci)">
+                <mat-icon>{{ isChecked(field.id, ci) ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+                <span>{{ opt }}</span>
+              </div>
+            }
+          }
+          @case ('RANKING') {
+            <p class="ranking-hint">Clique nas opções na ordem de preferência (clique novamente para remover)</p>
+            @for (opt of field.options; track opt; let ri = $index) {
+              <div class="choice-row"
+                   [class.ranked-item]="isRanked(field.id, ri)"
+                   (click)="isEmployee() && !submitSuccess() && rankItem(field.id, ri)">
+                <span class="rank-num" [class.rank-num-active]="isRanked(field.id, ri)">
+                  {{ getItemRank(field.id, ri) || '·' }}
+                </span>
+                <mat-icon>{{ isRanked(field.id, ri) ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                <span>{{ opt }}</span>
+              </div>
+            }
+          }
+          @case ('MATRIX') {
+            <div class="matrix-preview">
+              <table class="matrix-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    @for (col of field.matrixColumns; track col) {
+                      <th>{{ col }}</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of field.options; track row; let rowI = $index) {
+                    <tr>
+                      <td>{{ row }}</td>
+                      @for (col of field.matrixColumns; track col; let colI = $index) {
+                        <td class="matrix-cell"
+                            [class.matrix-cell-selected]="getMatrixCell(field.id, rowI) === colI"
+                            (click)="isEmployee() && !submitSuccess() && setMatrixCell(field.id, rowI, colI)">
+                          <mat-icon class="radio-icon">
+                            {{ getMatrixCell(field.id, rowI) === colI ? 'radio_button_checked' : 'radio_button_unchecked' }}
+                          </mat-icon>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+          @case ('MAP') {
+            <div class="map-plane-wrap">
+              <div class="map-plane interactive"
+                   (click)="onMapClick(field, $event)">
+                <div class="map-axis-h"></div>
+                <div class="map-axis-v"></div>
+                <span class="map-lbl map-lbl-top">{{ field.mapYTopLabel }}</span>
+                <span class="map-lbl map-lbl-bottom">{{ field.mapYBottomLabel }}</span>
+                <span class="map-lbl map-lbl-left">{{ field.mapXLeftLabel }}</span>
+                <span class="map-lbl map-lbl-right">{{ field.mapXRightLabel }}</span>
+                @if (getMapPos(field.id); as pos) {
+                  <div class="map-dot"
+                       [style.left.%]="pos.x * 100"
+                       [style.top.%]="(1 - pos.y) * 100"></div>
+                } @else {
+                  <div class="map-center-hint">
+                    <mat-icon>touch_app</mat-icon>
+                    <span>Clique para posicionar</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (isEmployee() && !submitSuccess() && !alreadyAnswered()) {
+    <div class="submit-row">
+      <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="submitting()">
+        <mat-icon>send</mat-icon> {{ submitting() ? 'Enviando…' : 'Enviar Respostas' }}
+      </button>
+    </div>
+  }
+</div>
+

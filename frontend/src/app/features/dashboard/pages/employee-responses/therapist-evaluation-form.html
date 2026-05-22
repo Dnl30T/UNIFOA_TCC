@@ -1,0 +1,113 @@
+<div class="eval-wrap">
+  <div class="eval-header">
+    <div class="eval-title-row">
+      <mat-icon class="eval-icon">psychology</mat-icon>
+      <h3 class="eval-title">Avaliação Clínica do Terapeuta</h3>
+      <span class="analysis-chip" [class]="currentAnalysisStatus().toLowerCase()">{{ currentAnalysisStatus() }}</span>
+    </div>
+    @if (updatedAt()) {
+      <span class="eval-meta">Última atualização: {{ updatedAt() }} — por {{ createdBy() }}</span>
+    }
+    @if (currentAnalysisStatus() === 'Draft') {
+      <span class="analysis-hint">Draft: análise salva, mas ainda incompleta.</span>
+    }
+    @if (currentAnalysisStatus() === 'Done') {
+      <span class="analysis-hint">Done: análise completa e pronta para enviar ao colaborador.</span>
+    }
+    @if (currentAnalysisStatus() === 'Submitted') {
+      <span class="analysis-hint">Submitted: análise publicada para o colaborador.</span>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="eval-loading"><mat-spinner diameter="32"></mat-spinner></div>
+  } @else {
+    <mat-accordion multi>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>flag</mat-icon>
+            Fechamento e Risco
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="section-caption">Fechamento Clínico</div>
+        <mat-form-field appearance="outline" class="full-width compact-field">
+          <mat-label>Pontuação Final Manual</mat-label>
+          <input matInput type="number" min="0" max="100"
+                 [ngModel]="finalScore()"
+                 (ngModelChange)="setFinalScore($event === '' ? null : +$event)" />
+          <mat-hint>Valor entre 0 e 100</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Comentário de Fechamento (obrigatório para publicar)</mat-label>
+          <textarea matInput rows="4"
+                    [ngModel]="closingCommentary()"
+                    (ngModelChange)="closingCommentary.set($event)"></textarea>
+        </mat-form-field>
+
+        <div class="section-caption">Panorama de Risco</div>
+        <div class="risk-grid">
+          <mat-form-field appearance="outline" class="risk-field">
+            <mat-label>Estresse</mat-label>
+            <input matInput type="number" min="0" max="100" [ngModel]="stressScore()" (ngModelChange)="clampRiskScore('stress', +$event)" />
+            <mat-hint>0 a 100</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="risk-field">
+            <mat-label>Sono</mat-label>
+            <input matInput type="number" min="0" max="100" [ngModel]="sleepScore()" (ngModelChange)="clampRiskScore('sleep', +$event)" />
+            <mat-hint>0 a 100</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="risk-field">
+            <mat-label>Sobrecarga</mat-label>
+            <input matInput type="number" min="0" max="100" [ngModel]="overloadScore()" (ngModelChange)="clampRiskScore('overload', +$event)" />
+            <mat-hint>0 a 100</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="risk-field">
+            <mat-label>Fadiga</mat-label>
+            <input matInput type="number" min="0" max="100" [ngModel]="fatigueScore()" (ngModelChange)="clampRiskScore('fatigue', +$event)" />
+            <mat-hint>0 a 100</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="risk-field">
+            <mat-label>Desengajamento</mat-label>
+            <input matInput type="number" min="0" max="100" [ngModel]="disengagementScore()" (ngModelChange)="clampRiskScore('disengagement', +$event)" />
+            <mat-hint>0 a 100</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="risk-field">
+            <mat-label>Isolamento</mat-label>
+            <input matInput type="number" min="0" max="100" [ngModel]="isolationScore()" (ngModelChange)="clampRiskScore('isolation', +$event)" />
+            <mat-hint>0 a 100</mat-hint>
+          </mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
+    </mat-accordion>
+
+    @if (successMessage()) {
+      <div class="eval-feedback success">
+        <mat-icon>check_circle</mat-icon> {{ successMessage() }}
+      </div>
+    }
+    @if (saveError()) {
+      <div class="eval-feedback error">
+        <mat-icon>error_outline</mat-icon> {{ saveError() }}
+      </div>
+    }
+
+    <div class="eval-actions">
+      <button mat-flat-button color="primary" [disabled]="saving()" (click)="save()">
+        @if (saving()) {
+          <mat-spinner diameter="18" style="display:inline-block;margin-right:8px"></mat-spinner>
+        } @else {
+          <mat-icon>save</mat-icon>
+        }
+        Salvar Avaliação
+      </button>
+      <button mat-stroked-button color="accent" [disabled]="publishing() || status() === 'PUBLISHED'" (click)="publish()">
+        <mat-icon>publish</mat-icon>
+        {{ status() === 'PUBLISHED' ? 'Análise Enviada' : 'Publicar Análise' }}
+      </button>
+    </div>
+  }
+</div>

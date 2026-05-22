@@ -1,0 +1,221 @@
+@use '../../page' as *;
+
+.filters-section {
+  margin-bottom: 24px;
+}
+
+.assessments-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.assessment-card {
+  mat-card-header {
+    margin-bottom: 16px;
+  }
+
+  .card-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background-color: #d1fae5;
+    border-radius: 50%;
+    margin-right: 16px;
+
+    mat-icon {
+      color: #15803d;
+    }
+  }
+
+  mat-card-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .card-title-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+
+    &.draft {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    &.published {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    &.closed {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+  }
+
+  .response-section {
+    padding: 12px;
+    background-color: #f9fafb;
+    border-radius: 8px;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+
+    .stat-label {
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: #111827;
+      font-size: 0.95rem;
+    }
+  }
+
+  .response-bar {
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 8px 0;
+
+    .response-fill {
+      height: 100%;
+      background: #15803d;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+  }
+
+  .completion-text {
+    display: block;
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 6px;
+  }
+
+  .card-actions-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 0 0;
+    margin-top: 12px;
+    border-top: 1px solid #e5e7eb;
+
+    button {
+      height: 36px;
+      font-size: 0.82rem;
+    }
+
+    .delete-btn {
+      color: #ef4444;
+      margin-left: auto;
+    }
+
+    .publish-btn {
+      background-color: #0369a1;
+      color: #fff;
+    }
+  }
+}
+
+.confirmation-card {
+  .confirm-dialog {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    text-align: center;
+
+    .confirm-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: #f59e0b;
+    }
+
+    .confirm-text {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      margin-top: 12px;
+
+      button {
+        flex: 1;
+      }
+    }
+
+    .duplicate-field {
+      width: 100%;
+      margin: 8px 0;
+    }
+  }
+}
+
+.empty-card {
+  grid-column: 1 / -1;
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 48px 24px;
+    text-align: center;
+    color: #9ca3af;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #d1d5db;
+    }
+
+    .empty-title {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .empty-subtitle {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    a {
+      margin-top: 12px;
+    }
+  }
+}
+

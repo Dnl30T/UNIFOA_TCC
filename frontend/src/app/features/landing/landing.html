@@ -1,0 +1,165 @@
+<header class="navbar">
+  <div class="navbar-inner">
+    <div class="logo-area">
+      <div class="logo-placeholder" aria-label="PsyTrack logo">
+        <!-- Replace this div with your <img src="logo.svg" alt="PsyTrack"> -->
+        <span class="logo-text">PsyTrack</span>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <a mat-button>Inicio</a>
+      <a mat-button>Funcionalidades</a>
+      <a mat-button>Sobre</a>
+      <a mat-button>Blog</a>
+      <a mat-button>Preços</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a mat-stroked-button color="primary" class="login-btn" routerLink="/auth/login">Login</a>
+      <a mat-flat-button color="primary" class="register-btn" routerLink="/auth/register">Cadastre-se</a>
+    </div>
+  </div>
+</header>
+
+<!-- ─── Hero ─────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1>
+        Lições e insights<br />
+        <span class="highlight">dos dados de burnout</span>
+      </h1>
+      <p>
+        Onde fazer seu time crescer com saúde: identifique riscos de burnout cedo,
+        aja antes que aconteça e construa um ambiente de trabalho mais saudável.
+      </p>
+      <a mat-flat-button color="primary" class="hero-cta" routerLink="/auth/register">Cadastre-se Grátis</a>
+    </div>
+    <div class="hero-image">
+      <div class="hero-illustration">
+        <mat-icon class="hero-icon">monitor_heart</mat-icon>
+      </div>
+    </div>
+  </div>
+  <div class="hero-dots">
+    <span class="dot active"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+  </div>
+</section>
+
+<!-- ─── Trusted by ─────────────────────────────────────────── -->
+<section class="trusted">
+  <h2 class="section-label">Confiado por organizações em todo o país</h2>
+  <div class="trusted-logos">
+    @for (i of [1,2,3,4,5,6,7]; track i) {
+      <div class="trusted-logo-item">
+        <mat-icon>business</mat-icon>
+        <span>Parceiro {{ i }}</span>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ─── Why PsyTrack ──────────────────────────────────────── -->
+<section class="why">
+  <div class="why-header">
+    <h2>Gerencie o bem-estar<br /><strong>de toda a sua equipe em um único sistema</strong></h2>
+    <p>Para quem o PsyTrack é indicado?</p>
+  </div>
+  <div class="features-grid">
+    @for (feature of features; track feature.title) {
+      <mat-card class="feature-card">
+        <mat-card-content>
+          <div class="feature-icon-wrap">
+            <mat-icon color="primary">{{ feature.icon }}</mat-icon>
+          </div>
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.description }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</section>
+
+<!-- ─── Stats ─────────────────────────────────────────────── -->
+<section class="stats">
+  <div class="stats-text">
+    <p class="stats-label">Ajudando organizações</p>
+    <h2>
+      Ajudando empresas locais<br />
+      <span class="highlight">a se reinventarem</span>
+    </h2>
+    <p class="stats-desc">
+      Substituímos o monitoramento manual tradicional por detecção inteligente
+      e orientada por dados do risco de burnout.
+    </p>
+  </div>
+  <div class="stats-grid">
+    @for (stat of stats; track stat.label) {
+      <div class="stat-item">
+        <mat-icon color="primary">trending_up</mat-icon>
+        <strong>{{ stat.value }}</strong>
+        <span>{{ stat.label }}</span>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ─── CTA Banner ────────────────────────────────────────── -->
+<section class="cta-banner">
+  <div class="cta-inner">
+    <h2>Como monitorar o risco<br />da sua equipe como fazemos</h2>
+    <p>
+      Comece a acompanhar o bem-estar do seu time hoje com a plataforma inteligente do PsyTrack.
+    </p>
+    <a mat-flat-button color="primary">Saiba Mais</a>
+  </div>
+  <div class="cta-image">
+    <mat-icon>phone_iphone</mat-icon>
+  </div>
+</section>
+
+<!-- ─── Footer ────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-placeholder small">
+        <!-- Replace with your logo image -->
+        <span class="logo-text">PsyTrack</span>
+      </div>
+      <p>
+        Plataforma de análise de risco de burnout para<br />organizações modernas.
+      </p>
+      <div class="footer-social">
+        <a mat-icon-button aria-label="Github"><mat-icon>code</mat-icon></a>
+        <a mat-icon-button aria-label="Twitter"><mat-icon>alternate_email</mat-icon></a>
+        <a mat-icon-button aria-label="Youtube"><mat-icon>play_circle</mat-icon></a>
+      </div>
+    </div>
+
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <a>Sobre Nós</a>
+        <a>Blog</a>
+        <a>Contato</a>
+      </div>
+      <div class="footer-col">
+        <h4>Produto</h4>
+        <a>Funcionalidades</a>
+        <a>Preços</a>
+        <a>Segurança</a>
+      </div>
+      <div class="footer-col">
+        <h4>Suporte</h4>
+        <a>Documentação</a>
+        <a>Central de Ajuda</a>
+        <a routerLink="/privacy-policy">Política de Privacidade</a>
+      </div>
+    </div>
+  </div>
+  <mat-divider></mat-divider>
+  <p class="footer-copy">© 2026 PsyTrack. Todos os direitos reservados.</p>
+</footer>

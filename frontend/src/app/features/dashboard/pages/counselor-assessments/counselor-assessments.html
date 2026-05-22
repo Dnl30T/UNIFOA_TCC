@@ -1,0 +1,148 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Minhas Avaliações</h2>
+      <p class="page-subtitle">Avaliações que você criou e publicou</p>
+    </div>
+    <a mat-flat-button color="primary" routerLink="/dashboard/forms/builder">
+      <mat-icon>add</mat-icon> Nova Avaliação
+    </a>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <app-filter-bar
+      [filterControls]="[
+        {
+          key: 'search',
+          type: 'search',
+          label: 'Search',
+          placeholder: 'Buscar por título...'
+        },
+        {
+          key: 'status',
+          type: 'select',
+          label: 'Status',
+          options: [
+            { label: 'Rascunho', value: 'draft' },
+            { label: 'Publicado', value: 'published' },
+            { label: 'Encerrado', value: 'closed' }
+          ]
+        }
+      ]"
+      (filtersChanged)="onFiltersChanged($event)">
+    </app-filter-bar>
+  </div>
+
+  <!-- Assessments Grid -->
+  <div class="assessments-grid">
+    @for (item of filteredItems(); track item.id) {
+      <!-- Delete Confirmation State -->
+      @if (confirmDeleteId() === item.id) {
+        <mat-card class="assessment-card confirmation-card">
+          <mat-card-content>
+            <div class="confirm-dialog">
+              <mat-icon class="confirm-icon">warning</mat-icon>
+              <p class="confirm-text">Excluir este rascunho permanentemente?</p>
+              <div class="confirm-actions">
+                <button mat-flat-button color="warn" (click)="confirmDelete()" [disabled]="deleting()">
+                  <mat-icon>delete</mat-icon>
+                  {{ deleting() ? 'Excluindo…' : 'Excluir' }}
+                </button>
+                <button mat-button (click)="cancelDelete()">Cancelar</button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      } @else if (duplicatingId() === item.id) {
+        <!-- Duplicate Title State -->
+        <mat-card class="assessment-card confirmation-card">
+          <mat-card-content>
+            <div class="confirm-dialog">
+              <mat-icon class="confirm-icon">content_copy</mat-icon>
+              <p class="confirm-text">Criar uma cópia com um novo título:</p>
+              <mat-form-field appearance="outline" class="duplicate-field">
+                <mat-label>Novo Título</mat-label>
+                <input matInput [ngModel]="duplicateNewTitle()" (ngModelChange)="duplicateNewTitle.set($event)">
+              </mat-form-field>
+              <div class="confirm-actions">
+                <button mat-flat-button color="primary" [disabled]="!duplicateNewTitle().trim()" (click)="confirmDuplicate()">
+                  <mat-icon>content_copy</mat-icon> Criar Cópia
+                </button>
+                <button mat-button (click)="cancelDuplicate()">Cancelar</button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <!-- Normal Assessment Card -->
+        <mat-card class="assessment-card">
+          <mat-card-header>
+            <div class="card-avatar">
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <div class="card-title-section">
+              <mat-card-title>{{ item.title }}</mat-card-title>
+              <span class="status-chip" [class]="item.status">{{ item.status | uppercase }}</span>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Response Stats -->
+            <div class="response-section">
+              <div class="stat-row">
+                <span class="stat-label">Respostas</span>
+                <span class="stat-value">{{ item.responses }} / {{ item.total }}</span>
+              </div>
+              <div class="response-bar">
+                <div class="response-fill" [style.width.%]="completionRate(item)"></div>
+              </div>
+              <span class="completion-text">{{ completionRate(item) }}% concluído</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="card-actions-section">
+              <button mat-flat-button color="primary" (click)="onAssessmentAction('edit', item)">
+                Editar
+              </button>
+              @if (item.status === 'draft') {
+                <button mat-flat-button class="publish-btn" (click)="onAssessmentAction('publish', item)">
+                  Publicar
+                </button>
+              }
+              <button mat-stroked-button (click)="onAssessmentAction('duplicate', item)">
+                Duplicar
+              </button>
+              <button mat-button (click)="onAssessmentAction('view', item)">
+                Visualizar
+              </button>
+              @if (item.status === 'published') {
+                <button mat-button (click)="onAssessmentAction('close', item)" [disabled]="closingId() === item.id">
+                  {{ closingId() === item.id ? 'Encerrando…' : 'Encerrar' }}
+                </button>
+              }
+              @if (item.status === 'draft') {
+                <button mat-button class="delete-btn" (click)="onAssessmentAction('delete', item)">
+                  Excluir
+                </button>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    } @empty {
+      <mat-card class="assessment-card empty-card">
+        <mat-card-content>
+          <div class="empty-state">
+            <mat-icon>assignment_late</mat-icon>
+            <p class="empty-title">Sem avaliações</p>
+            <p class="empty-subtitle">Crie sua primeira avaliação para começar</p>
+            <a mat-flat-button color="primary" routerLink="/dashboard/forms/builder">
+              <mat-icon>add</mat-icon> Criar Avaliação
+            </a>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</div>

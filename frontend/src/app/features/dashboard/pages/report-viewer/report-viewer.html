@@ -1,0 +1,239 @@
+<div class="page">
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="center-fill">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      {{ error() }}
+      <button mat-button (click)="back()">Voltar</button>
+    </div>
+  }
+
+  @if (!loading() && !error() && report()) {
+
+    <!-- ── Header ─────────────────────────────────────────────────────── -->
+    <div class="report-header">
+      <button mat-icon-button (click)="back()" class="back-btn" matTooltip="Voltar">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-text">
+        <h2 class="report-title">{{ report()!.name }}</h2>
+        <div class="header-meta">
+          <span><mat-icon>assignment</mat-icon> {{ formTitle() }}</span>
+          <span><mat-icon>groups</mat-icon> {{ teamName() }}</span>
+          <span><mat-icon>calendar_today</mat-icon> {{ report()!.generatedAt | date:'dd/MM/yyyy' }}</span>
+          @if (isCounselor()) {
+            <span class="created-by"><mat-icon>person</mat-icon> Gerado por {{ report()!.createdBy }}</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ── KPI Row ─────────────────────────────────────────────────────── -->
+    <div class="kpi-row">
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <div class="kpi-icon" style="background:#fff3e0"><mat-icon style="color:#f57c00">monitor_heart</mat-icon></div>
+          <div class="kpi-body">
+            <p class="kpi-label">Score Médio</p>
+            <p class="kpi-value">{{ report()!.averageScore | number:'1.1-1' }}<span class="kpi-unit">/100</span></p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card" [class]="'risk-' + report()!.generalRisk.toLowerCase()">
+        <mat-card-content>
+          <div class="kpi-icon" style="background:#ffebee"><mat-icon style="color:#c62828">warning_amber</mat-icon></div>
+          <div class="kpi-body">
+            <p class="kpi-label">Risco Geral</p>
+            <p class="kpi-value">{{ riskLabel(report()!.generalRisk) }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <div class="kpi-icon" style="background:#e8f5e9"><mat-icon style="color:#2e7d32">people</mat-icon></div>
+          <div class="kpi-body">
+            <p class="kpi-label">Respondentes</p>
+            <p class="kpi-value">{{ report()!.respondentCount }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      @if (isCounselor()) {
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <div class="kpi-icon" style="background:#e1f5fe"><mat-icon style="color:#0277bd">verified</mat-icon></div>
+            <div class="kpi-body">
+              <p class="kpi-label">Avaliações Publicadas</p>
+              <p class="kpi-value">{{ publishedEvalCount() }}<span class="kpi-unit"> / {{ report()!.respondentCount }}</span></p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <!-- ── Charts Row ──────────────────────────────────────────────────── -->
+    <div class="charts-row">
+      <mat-card class="chart-card">
+        <mat-card-content>
+          <h3 class="chart-title">Distribuição de Risco</h3>
+          <div #donutChart class="chart-canvas"></div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card">
+        <mat-card-content>
+          <h3 class="chart-title">Perfil de Burnout — Média da Equipe</h3>
+          <div #radarChart class="chart-canvas"></div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- ── Bar Chart (Counselor only) ─────────────────────────────────── -->
+    @if (isCounselor()) {
+      <mat-card class="chart-card chart-card--full" style="margin-bottom:24px">
+        <mat-card-content>
+          <h3 class="chart-title">Distribuição de Scores</h3>
+          <div #barChart class="chart-canvas chart-canvas--bar"></div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- ── Counselor: Individual Member Table ─────────────────────────── -->
+    @if (isCounselor()) {
+      <mat-card>
+        <mat-card-content>
+          <h3 class="section-title">Avaliações Individuais</h3>
+          @if (members().length === 0) {
+            <div class="empty-state">
+              <mat-icon>people_outline</mat-icon>
+              <p>Nenhum respondente encontrado.</p>
+            </div>
+          } @else {
+            <div class="member-list">
+              @for (row of members(); track row.id) {
+                <div class="member-item" [class.member-item--expanded]="row.expanded">
+                  <!-- Main row -->
+                  <div class="member-main" (click)="toggleRow(row)">
+                    <div class="member-avatar">{{ initials(row.name) }}</div>
+                    <div class="member-name">{{ row.name }}</div>
+
+                    <div class="member-score">
+                      <span class="score-num" [style.color]="scoreColor(row.score)">{{ row.score }}</span>
+                      <span class="score-max">/100</span>
+                      <div class="score-bar">
+                        <div class="score-fill" [style.width.%]="row.score" [style.background]="scoreColor(row.score)"></div>
+                      </div>
+                    </div>
+
+                    <span class="status-chip" [class]="riskClass(row.riskLevel)">{{ riskLabel(row.riskLevel) }}</span>
+
+                    <div class="dims">
+                      <span class="dim-chip" [style.background]="dimColor(row.stressScore)" [style.color]="dimTextColor(row.stressScore)" matTooltip="Estresse">
+                        E {{ row.stressScore ?? '–' }}
+                      </span>
+                      <span class="dim-chip" [style.background]="dimColor(row.fatigueScore)" [style.color]="dimTextColor(row.fatigueScore)" matTooltip="Fadiga">
+                        F {{ row.fatigueScore ?? '–' }}
+                      </span>
+                      <span class="dim-chip" [style.background]="dimColor(row.overloadScore)" [style.color]="dimTextColor(row.overloadScore)" matTooltip="Sobrecarga">
+                        S {{ row.overloadScore ?? '–' }}
+                      </span>
+                      <span class="dim-chip" [style.background]="dimColor(row.sleepScore)" [style.color]="dimTextColor(row.sleepScore)" matTooltip="Sono">
+                        So {{ row.sleepScore ?? '–' }}
+                      </span>
+                      <span class="dim-chip" [style.background]="dimColor(row.isolationScore)" [style.color]="dimTextColor(row.isolationScore)" matTooltip="Isolamento">
+                        I {{ row.isolationScore ?? '–' }}
+                      </span>
+                      <span class="dim-chip" [style.background]="dimColor(row.disengagementScore)" [style.color]="dimTextColor(row.disengagementScore)" matTooltip="Desengajamento">
+                        D {{ row.disengagementScore ?? '–' }}
+                      </span>
+                    </div>
+
+                    <mat-icon class="expand-icon">{{ row.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  </div>
+
+                  <!-- Expanded content -->
+                  @if (row.expanded) {
+                    <div class="member-details">
+                      @if (row.hrSummary) {
+                        <div class="detail-block">
+                          <p class="detail-label">Resumo para RH</p>
+                          <p class="detail-text">{{ row.hrSummary }}</p>
+                        </div>
+                      }
+                      @if (row.closingCommentary) {
+                        <div class="detail-block">
+                          <p class="detail-label">Comentário de Encerramento</p>
+                          <p class="detail-text">{{ row.closingCommentary }}</p>
+                        </div>
+                      }
+                      @if (!row.hrSummary && !row.closingCommentary) {
+                        <p class="detail-empty">Sem avaliação publicada para este colaborador.</p>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- ── Manager: Anonymous Grid ────────────────────────────────────── -->
+    @if (!isCounselor()) {
+      <mat-card>
+        <mat-card-content>
+          <h3 class="section-title">Colaboradores</h3>
+
+          @if (showPrivacyNotice()) {
+            <div class="privacy-notice">
+              <mat-icon>shield</mat-icon>
+              <div>
+                <strong>Dados insuficientes para exibição individual</strong>
+                <p>São necessários pelo menos 5 respondentes para exibir dados individuais. Isso protege a privacidade dos colaboradores.</p>
+              </div>
+            </div>
+          } @else {
+            <div class="anon-grid">
+              @for (row of members(); track row.id; let i = $index) {
+                <div class="anon-card" [class]="'anon-card--' + riskClass(row.riskLevel)">
+                  <div class="anon-header">
+                    <div class="anon-avatar">{{ i + 1 }}</div>
+                    <div class="anon-info">
+                      <span class="anon-label">Membro {{ i + 1 }}</span>
+                      <span class="status-chip" [class]="riskClass(row.riskLevel)">{{ riskLabel(row.riskLevel) }}</span>
+                    </div>
+                  </div>
+                  <div class="anon-score">
+                    <span class="score-num" [style.color]="scoreColor(row.score)">{{ row.score }}</span>
+                    <span class="score-max">/100</span>
+                  </div>
+                  <div class="score-bar">
+                    <div class="score-fill" [style.width.%]="row.score" [style.background]="scoreColor(row.score)"></div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Footer note -->
+    <p class="footer-note">
+      Relatório gerado em {{ report()!.generatedAt | date:'dd/MM/yyyy HH:mm' }}
+      @if (isCounselor()) { · por {{ report()!.createdBy }} }
+    </p>
+
+  }
+</div>

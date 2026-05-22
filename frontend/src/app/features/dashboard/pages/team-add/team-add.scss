@@ -1,0 +1,111 @@
+@use '../../page' as *;
+
+.pool-count-badge {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.code-card {
+  margin-bottom: 16px;
+  max-width: 600px;
+
+  .code-hint {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0 0 16px;
+  }
+}
+
+.code-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  .code-field {
+    flex: 1;
+    margin: 0;
+  }
+
+  button {
+    margin-top: 4px;
+    height: 56px;
+    white-space: nowrap;
+  }
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #dc2626;
+  font-weight: 500;
+  margin-top: 12px;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+}
+
+.team-result-card {
+  max-width: 600px;
+  transition: border-color 0.15s, background 0.15s;
+
+  &.in-pool {
+    border-color: #bfdbfe !important;
+    background: #eff6ff !important;
+  }
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  .team-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .team-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+
+    mat-icon { color: #6b7280; transition: color 0.15s; }
+
+    &.active {
+      background: #dbeafe;
+      mat-icon { color: #1d4ed8; }
+    }
+  }
+
+  .team-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #111827;
+    margin: 0 0 2px;
+  }
+
+  .in-pool-label {
+    font-size: 0.75rem;
+    color: #1d4ed8;
+    font-weight: 500;
+  }
+}

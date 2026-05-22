@@ -1,0 +1,61 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Publicar Avaliação</h2>
+      <p class="page-subtitle">O formulário será enviado ao seu time</p>
+    </div>
+    <a mat-stroked-button [routerLink]="['/dashboard/forms/view', formId()]">
+      <mat-icon>arrow_back</mat-icon> Voltar
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (error() && !assessment()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon> {{ error() }}
+    </div>
+  } @else {
+    <mat-card class="publish-intro">
+      <mat-card-content>
+        <p class="form-title">{{ assessment()!.title }}</p>
+        @if (assessment()!.description) {
+          <p class="form-desc">{{ assessment()!.description }}</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="teams-card">
+      <mat-card-content>
+        <span class="teams-label">Time destinatário</span>
+
+        @if (myTeam()) {
+          <div class="team-row selected">
+            <mat-icon class="team-icon">groups</mat-icon>
+            <span class="team-name">{{ myTeam()!.name }}</span>
+            <mat-icon class="check-icon">check_circle</mat-icon>
+          </div>
+        } @else {
+          <p class="no-teams">Você não está vinculado a nenhum time. Peça ao administrador para atribuir um time.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    @if (error()) {
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon> {{ error() }}
+      </div>
+    }
+
+    <div class="publish-footer">
+      <button mat-flat-button color="primary"
+              [disabled]="!canPublish()"
+              (click)="onPublish()">
+        <mat-icon>send</mat-icon>
+        {{ publishing() ? 'Publicando…' : 'Publicar para o Time' }}
+      </button>
+    </div>
+  }
+</div>

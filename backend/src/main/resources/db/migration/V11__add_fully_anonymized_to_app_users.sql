@@ -1,0 +1,2 @@
+ALTER TABLE app_users
+    ADD COLUMN fully_anonymized BOOLEAN NOT NULL DEFAULT FALSE;

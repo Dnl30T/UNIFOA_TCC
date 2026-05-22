@@ -1,0 +1,273 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Relatórios</h2>
+      <p class="page-subtitle">Geração de relatórios e avaliações individuais</p>
+    </div>
+  </div>
+
+  <mat-tab-group animationDuration="200ms">
+
+    <!-- ── Tab 1: Relatórios de Time (Workflow Steps) ──────────────────── -->
+    <mat-tab label="Relatórios de Time">
+      <div style="padding-top:20px">
+
+        @if (reportsLoading()) {
+          <div style="display:flex;justify-content:center;padding:48px">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+        } @else if (formsReadiness().length === 0) {
+          <div class="empty-state">
+            <mat-icon>assignment_late</mat-icon>
+            <p>Nenhum formulário publicado para o seu time.</p>
+          </div>
+        } @else {
+
+          @if (generateError()) {
+            <div class="error-banner">
+              <mat-icon>error</mat-icon>
+              {{ generateError() }}
+            </div>
+          }
+
+          @for (row of formsReadiness(); track row.formId) {
+            <mat-card class="form-readiness-card">
+              <mat-card-header>
+                <div mat-card-avatar class="card-avatar">
+                  <mat-icon>assignment</mat-icon>
+                </div>
+                <mat-card-title>{{ row.formTitle }}</mat-card-title>
+                <mat-card-subtitle>
+                  <span class="status-chip" [class]="row.formStatus.toLowerCase()">
+                    {{ formStatusLabel(row.formStatus) }}
+                  </span>
+                </mat-card-subtitle>
+              </mat-card-header>
+
+              <mat-card-content>
+                <!-- Step Indicator showing workflow progress -->
+                <div class="form-readiness-steps">
+                  <app-step-indicator [steps]="getStepsForForm(row)"></app-step-indicator>
+                </div>
+
+                <!-- Action Card for report generation -->
+                <div class="form-readiness-actions">
+                  @if (!row.showNameInput) {
+                    <app-action-card
+                      [actions]="getReportActions(row)"
+                      (actionTriggered)="onReportAction($event, row)"
+                    ></app-action-card>
+                  } @else {
+                    <div class="report-name-input-section">
+                      <mat-form-field appearance="outline" class="report-name-field">
+                        <mat-label>Nome do relatório</mat-label>
+                        <input matInput [(ngModel)]="row.newReportName" placeholder="Ex: Q2 2025 Burnout Assessment">
+                      </mat-form-field>
+                      <app-action-card
+                        [actions]="getReportNameActions(row)"
+                        (actionTriggered)="$event === 'confirm' ? confirmGenerateReport(row) : cancelReportGeneration(row)"
+                      ></app-action-card>
+                    </div>
+                  }
+                </div>
+
+                <!-- Generated Reports Table -->
+                @if (row.reports.length > 0) {
+                  <div class="form-readiness-reports">
+                    <h4>Relatórios Gerados</h4>
+                    <table mat-table [dataSource]="row.reports" class="reports-table">
+                      <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef>Relatório</th>
+                        <td mat-cell *matCellDef="let r"><strong>{{ r.name }}</strong></td>
+                      </ng-container>
+                      <ng-container matColumnDef="generatedAt">
+                        <th mat-header-cell *matHeaderCellDef>Gerado em</th>
+                        <td mat-cell *matCellDef="let r">{{ r.generatedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="respondents">
+                        <th mat-header-cell *matHeaderCellDef>Respondentes</th>
+                        <td mat-cell *matCellDef="let r">{{ r.respondentCount }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="avgScore">
+                        <th mat-header-cell *matHeaderCellDef>Score Médio</th>
+                        <td mat-cell *matCellDef="let r"><span class="score-value">{{ r.averageScore | number:'1.1-1' }} / 100</span></td>
+                      </ng-container>
+                      <ng-container matColumnDef="generalRisk">
+                        <th mat-header-cell *matHeaderCellDef>Risco Geral</th>
+                        <td mat-cell *matCellDef="let r">
+                          <span class="status-chip" [class]="riskClass(r.generalRisk)">{{ riskLabel(r.generalRisk) }}</span>
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let r">
+                          <button mat-stroked-button (click)="viewReportDashboard(r)">Ver Dashboard</button>
+                        </td>
+                      </ng-container>
+                      <tr mat-header-row *matHeaderRowDef="reportsColumns"></tr>
+                      <tr mat-row *matRowDef="let r; columns: reportsColumns"></tr>
+                    </table>
+                  </div>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ── Tab 2: Avaliações Individuais (Clear Workflow) ─────────────── -->
+    <mat-tab label="Avaliações Individuais">
+      <div style="padding-top:20px">
+
+        <!-- Form Selection Card -->
+        @if (allForms().length > 0) {
+          <mat-card style="margin-bottom:16px">
+            <mat-card-content style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <mat-form-field appearance="outline" style="min-width:260px;margin-bottom:-1.25em">
+                <mat-label>Filtrar por avaliação</mat-label>
+                <mat-select [ngModel]="selectedFormId()" (ngModelChange)="onFormFilterChange($event)">
+                  @for (form of allForms(); track form.id) {
+                    <mat-option [value]="form.id">{{ form.title }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              @if (formReport()) {
+                <span class="report-scope-badge">
+                  <mat-icon style="font-size:16px;width:16px;height:16px">summarize</mat-icon>
+                  Relatório: <strong>{{ formReport()!.name }}</strong> —
+                  Exibindo {{ members().length }} respondentes incluídos
+                </span>
+              } @else if (selectedFormId()) {
+                <span style="font-size:.82rem;color:#64748b">
+                  <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle">info</mat-icon>
+                  Sem relatório gerado — exibindo todos os membros
+                </span>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+
+        @if (membersLoading()) {
+          <div style="display:flex;justify-content:center;padding:48px">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+        } @else if (!selectedFormId()) {
+          <div class="empty-state">
+            <mat-icon>assignment_late</mat-icon>
+            <p>Selecione uma avaliação para ver as avaliações individuais.</p>
+          </div>
+        } @else {
+
+          <!-- Batch Publish Section with Action Card -->
+          <div class="batch-section">
+            <h3>Avaliar e Publicar Análises</h3>
+            @if (selectedBatchCount() > 0) {
+              <app-action-card
+                [actions]="getBatchActions()"
+                (actionTriggered)="onBatchAction($event)"
+              ></app-action-card>
+            }
+            @if (batchMessage()) {
+              <p class="batch-message">{{ batchMessage() }}</p>
+            }
+          </div>
+
+          <!-- Members Table (card layout) -->
+          <div class="members-table-section">
+            @if (filteredMembers().length === 0) {
+              <div class="empty-state">
+                <mat-icon>people_outline</mat-icon>
+                <p>Nenhum respondente encontrado para esta avaliação.</p>
+              </div>
+            } @else {
+              <div class="members-cards">
+                @for (row of filteredMembers(); track row.id) {
+                  <mat-card class="member-card" [class.responded]="row.status === 'responded'" [class.evaluated]="row.status === 'evaluated'">
+                    <div class="member-header">
+                      @if (canBatchPublish(row)) {
+                        <mat-checkbox [checked]="isSelected(row.id)" (change)="toggleSelected(row.id, $event.checked)"></mat-checkbox>
+                      }
+                      <div class="avatar">{{ initials(row.name) }}</div>
+                      <div class="member-info"><strong>{{ row.name }}</strong></div>
+                      <div class="member-meta">
+                        @if (row.responseCount > 0) {
+                          <span class="response-count">
+                            <mat-icon style="font-size:14px;width:14px;height:14px">quiz</mat-icon>
+                            {{ row.responseCount }} respostas
+                          </span>
+                        }
+                        <span class="status-chip" [class]="row.status">
+                          <mat-icon>{{ statusIcon(row.status) }}</mat-icon>
+                          {{ statusLabel(row.status) }}
+                        </span>
+                      </div>
+                    </div>
+
+                    @if (row.status === 'evaluated') {
+                      <div class="result-info">
+                        <span><span class="label">Score:</span> <strong>{{ row.existingScore }}/100</strong></span>
+                        <span><span class="label">Risco:</span> <strong>{{ riskLabel(row.existingRisk ?? '') }}</strong></span>
+                      </div>
+                    }
+
+                    @if (row.analysisFeedback) {
+                      <p class="analysis-feedback">{{ row.analysisFeedback }}</p>
+                    }
+
+                    <!-- Action buttons for member -->
+                    @if (row.status === 'responded' && !row.showForm) {
+                      <div style="margin-top:12px;display:flex;gap:8px">
+                        <button mat-stroked-button style="height:34px;font-size:0.82rem" (click)="viewResponses(row)">
+                          <mat-icon>visibility</mat-icon> Ver Respostas
+                        </button>
+                        <button mat-flat-button color="primary" style="height:34px;font-size:0.82rem" (click)="showGenerateForm(row)">
+                          <mat-icon>assessment</mat-icon> Gerar Avaliação
+                        </button>
+                        <button mat-button style="height:34px;font-size:0.82rem" [disabled]="row.publishing" (click)="publishRow(row)">
+                          <mat-icon>publish</mat-icon> {{ row.publishing ? 'Publicando...' : 'Publicar' }}
+                        </button>
+                      </div>
+                    }
+
+                    @if (row.status === 'evaluated') {
+                      <div style="margin-top:12px;display:flex;gap:8px">
+                        <button mat-stroked-button style="height:34px;font-size:0.82rem" (click)="viewResponses(row)">
+                          <mat-icon>visibility</mat-icon> Ver Respostas
+                        </button>
+                        <button mat-button style="height:34px;font-size:0.82rem" [disabled]="row.publishing" (click)="publishRow(row)">
+                          <mat-icon>publish</mat-icon> {{ row.publishing ? 'Publicando...' : 'Publicar novamente' }}
+                        </button>
+                      </div>
+                    }
+
+                    @if (row.showForm) {
+                      <div class="generate-form">
+                        <mat-form-field appearance="outline" style="width:120px">
+                          <mat-label>Score (0–100)</mat-label>
+                          <input matInput type="number" min="0" max="100" [(ngModel)]="row.scoreInput">
+                        </mat-form-field>
+                        <div class="risk-preview">Risco: <strong>{{ riskLabel(computeRisk(row.scoreInput)) }}</strong></div>
+                        <button mat-flat-button color="primary"
+                                [disabled]="row.generating || row.scoreInput < 0 || row.scoreInput > 100"
+                                (click)="generateResult(row)">
+                          {{ row.generating ? 'Gerando…' : 'Confirmar' }}
+                        </button>
+                        <button mat-button (click)="cancelForm(row)">Cancelar</button>
+                      </div>
+                    }
+                  </mat-card>
+                }
+              </div>
+            }
+          </div>
+
+        }
+
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>
+

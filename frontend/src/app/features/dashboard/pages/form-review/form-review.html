@@ -1,0 +1,178 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Review Assessment</h2>
+      <p class="page-subtitle">Preview how your form will look before publishing</p>
+    </div>
+    <div class="action-row">
+      <button mat-stroked-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon> Back to Editor
+      </button>
+    </div>
+  </div>
+
+  @if (!draft()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else {
+    <!-- Form meta -->
+    <mat-card class="review-intro">
+      <mat-card-content>
+        <h3 class="review-title">{{ draft()!.meta.title }}</h3>
+        @if (draft()!.meta.description) {
+          <p class="review-desc">{{ draft()!.meta.description }}</p>
+        }
+        <div class="review-stats">
+          <span><mat-icon>quiz</mat-icon> {{ draft()!.fields.length }} questions</span>
+          <span class="status-chip draft">DRAFT</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Field preview cards -->
+    @for (field of draft()!.fields; track field.id; let i = $index) {
+      <mat-card class="viewer-field">
+        <mat-card-content>
+          <p class="viewer-label">
+            {{ i + 1 }}. {{ field.label }}
+            @if (field.required) { <span class="required-mark">*</span> }
+            <span class="type-badge">{{ fieldLabel(field.type) }}</span>
+          </p>
+
+          @switch (field.type) {
+            @case ('TEXT') {
+              <div class="field-placeholder">Short answer…</div>
+            }
+            @case ('LONG_TEXT') {
+              <div class="field-placeholder multi">Long answer…</div>
+            }
+            @case ('NUMERIC') {
+              <div class="field-placeholder narrow">0</div>
+            }
+            @case ('DATE') {
+              <div class="field-placeholder narrow">DD / MM / YYYY</div>
+            }
+            @case ('BOOLEAN') {
+              <div class="bool-row">
+                <div class="bool-chip yes">Yes</div>
+                <div class="bool-chip no">No</div>
+              </div>
+            }
+            @case ('SCALE') {
+              <div class="scale-row">
+                @for (n of scaleRange(field); track n) {
+                  <button class="scale-btn" disabled>{{ n }}</button>
+                }
+              </div>
+              <div class="scale-labels">
+                <span>{{ field.scaleMinLabel }}</span>
+                <span>{{ field.scaleMaxLabel }}</span>
+              </div>
+            }
+            @case ('SLIDER') {
+              <div class="slider-preview">
+                <span>{{ field.sliderMin }}</span>
+                <div class="slider-track"><div class="slider-thumb"></div></div>
+                <span>{{ field.sliderMax }}</span>
+              </div>
+            }
+            @case ('LIKERT') {
+              <div class="likert-row">
+                @for (opt of field.options; track $index; let oi = $index) {
+                  <div class="likert-item">
+                    <div class="likert-circle">{{ oi + 1 }}</div>
+                    <span>{{ opt }}</span>
+                  </div>
+                }
+              </div>
+            }
+            @case ('SINGLE_CHOICE') {
+              @for (opt of field.options; track opt) {
+                <div class="choice-row">
+                  <mat-icon>radio_button_unchecked</mat-icon>
+                  <span>{{ opt }}</span>
+                </div>
+              }
+            }
+            @case ('MULTIPLE_CHOICE') {
+              @for (opt of field.options; track opt) {
+                <div class="choice-row">
+                  <mat-icon>check_box_outline_blank</mat-icon>
+                  <span>{{ opt }}</span>
+                </div>
+              }
+            }
+            @case ('RANKING') {
+              @for (opt of field.options; track opt; let ri = $index) {
+                <div class="choice-row">
+                  <span class="rank-num">{{ ri + 1 }}</span>
+                  <mat-icon>drag_indicator</mat-icon>
+                  <span>{{ opt }}</span>
+                </div>
+              }
+            }
+            @case ('MATRIX') {
+              <div class="matrix-preview">
+                <table class="matrix-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      @for (col of field.matrixColumns; track col) {
+                        <th>{{ col }}</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of field.options; track row) {
+                      <tr>
+                        <td>{{ row }}</td>
+                        @for (col of field.matrixColumns; track col) {
+                          <td><mat-icon class="radio-icon">radio_button_unchecked</mat-icon></td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+            @case ('MAP') {
+              <div class="map-plane-wrap">
+                <div class="map-plane static">
+                  <div class="map-axis-h"></div>
+                  <div class="map-axis-v"></div>
+                  <span class="map-lbl map-lbl-top">{{ field.mapYTopLabel }}</span>
+                  <span class="map-lbl map-lbl-bottom">{{ field.mapYBottomLabel }}</span>
+                  <span class="map-lbl map-lbl-left">{{ field.mapXLeftLabel }}</span>
+                  <span class="map-lbl map-lbl-right">{{ field.mapXRightLabel }}</span>
+                  <div class="map-center-hint">
+                    <mat-icon>touch_app</mat-icon>
+                    <span>Click to position</span>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Error -->
+    @if (saveError()) {
+      <p class="save-error"><mat-icon>error_outline</mat-icon> {{ saveError() }}</p>
+    }
+
+    <!-- Actions -->
+    <div class="review-actions">
+      <button mat-stroked-button (click)="goBack()" [disabled]="saving()">
+        <mat-icon>edit</mat-icon> Edit
+      </button>
+      <button mat-stroked-button color="accent" (click)="onSaveDraft()" [disabled]="saving()">
+        <mat-icon>save</mat-icon> {{ saving() ? 'Saving…' : 'Save as Draft' }}
+      </button>
+      <button mat-flat-button color="primary" (click)="onSaveAndPublish()" [disabled]="saving()">
+        <mat-icon>send</mat-icon> {{ saving() ? 'Publishing…' : 'Publish to Teams' }}
+      </button>
+    </div>
+  }
+</div>
