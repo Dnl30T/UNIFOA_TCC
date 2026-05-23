@@ -59,6 +59,16 @@ data class TherapistEvaluationResponseDto(
     val updatedAt: Instant?,
 )
 
+data class AutoScoresDto(
+    val stressScore: Int?,
+    val sleepScore: Int?,
+    val overloadScore: Int?,
+    val fatigueScore: Int?,
+    val disengagementScore: Int?,
+    val isolationScore: Int?,
+    val overallScore: Int?,
+)
+
 data class TherapistComprehensiveResponseDto(
     val formId: UUID,
     val employeeId: UUID,
@@ -71,6 +81,7 @@ data class TherapistComprehensiveResponseDto(
     val submittedAt: Instant,
     val closedAt: Instant?,
     val therapistEvaluation: TherapistEvaluationResponseDto?,
+    val autoScores: AutoScoresDto?,
 )
 
 data class PublishBatchRequestDto(

@@ -222,6 +222,31 @@
   &.type-date           { background: #ec4899; }
 }
 
+// ─── Clinical flag chips ──────────────────────────────────────────────────────
+.flag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.flag-chip {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+
+  &.flag-estresse        { background: #fee2e2; color: #991b1b; }
+  &.flag-sono            { background: #dbeafe; color: #1e40af; }
+  &.flag-sobrecarga      { background: #fef3c7; color: #92400e; }
+  &.flag-fadiga          { background: #fce7f3; color: #9d174d; }
+  &.flag-desengajamento  { background: #e0e7ff; color: #3730a3; }
+  &.flag-isolamento      { background: #d1fae5; color: #065f46; }
+}
+
 .question-text {
   font-size: 0.95rem;
   font-weight: 500;

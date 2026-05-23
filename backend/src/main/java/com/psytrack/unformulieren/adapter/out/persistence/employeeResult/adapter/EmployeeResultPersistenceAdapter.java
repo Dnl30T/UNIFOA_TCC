@@ -50,6 +50,11 @@ public class EmployeeResultPersistenceAdapter implements EmployeeResultRepositor
     }
 
     @Override
+    public List<EmployeeResult> findAllByFormId(UUID formId) {
+        return repository.findAllByFormId(formId).stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
     public Optional<EmployeeResult> findByEmployeeIdAndFormId(UUID employeeId, UUID formId) {
         return repository.findByEmployeeIdAndFormId(employeeId, formId).map(mapper::toDomain);
     }

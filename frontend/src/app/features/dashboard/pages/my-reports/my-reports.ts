@@ -1,11 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { EmployeeResultService, EmployeeResultResponseDto } from '../../../../core/services/employee-result.service';
+import { EmployeeResultService } from '../../../../core/services/employee-result.service';
 import { FormService, FormResponseDto } from '../../../../core/services/form.service';
 import { EmployeeService } from '../../../../core/services/employee.service';
 import { TherapistEvaluationService } from '../../../../core/services/therapist-evaluation.service';
@@ -16,19 +16,19 @@ interface Report {
   date: string;
   score: number;
   risk: 'low' | 'moderate' | 'high';
-}
-
-interface PublishedAnalysis {
-  formId: string;
-  title: string;
-  publishedAt: string;
   commentary: string;
   counselor: string;
+  stressScore: number | null;
+  sleepScore: number | null;
+  overloadScore: number | null;
+  fatigueScore: number | null;
+  disengagementScore: number | null;
+  isolationScore: number | null;
 }
 
 @Component({
   selector: 'app-my-reports',
-  imports: [MatCardModule, MatTableModule, MatButtonModule, MatIconModule],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './my-reports.html',
   styleUrl: './my-reports.scss',
 })
@@ -38,69 +38,104 @@ export class MyReports implements OnInit {
   private employeeService = inject(EmployeeService);
   private evaluationService = inject(TherapistEvaluationService);
 
-  columns = ['title', 'date', 'score', 'risk', 'action'];
-  items = signal<Report[]>([]);
-  analyses = signal<PublishedAnalysis[]>([]);
+  loading = signal(true);
+  reports = signal<Report[]>([]);
 
   ngOnInit(): void {
     this.employeeService.getMe().subscribe({
       next: me => {
         forkJoin({
-          results: this.resultService.getAll({ employeeId: me.id }),
-          forms: this.formService.getAll(),
-        }).subscribe({
-          next: ({ results, forms }) => {
-            const formMap = new Map<string, FormResponseDto>(forms.map(f => [f.id, f]));
-            this.items.set(results.map((r: EmployeeResultResponseDto) => ({
-              title: formMap.get(r.formId)?.title ?? r.formId,
-              formId: r.formId,
-              date: r.calculatedAt ? new Date(r.calculatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
-              score: r.finalScore ?? r.score,
-              risk: this.toRisk(r.riskLevel),
-            })));
+          results: this.resultService.getAll({ employeeId: me.id }).pipe(catchError(() => of([]))),
+          forms: this.formService.getAll().pipe(catchError(() => of([]))),
+        }).subscribe(({ results, forms }) => {
+          const formMap = new Map<string, FormResponseDto>(
+            (forms as FormResponseDto[]).map(f => [f.id, f])
+          );
 
-            this.loadPublishedAnalyses(forms, formMap);
-          },
+          if (forms.length === 0) {
+            this.loading.set(false);
+            return;
+          }
+
+          // Try to fetch published analysis for each form (only returns data when PUBLISHED)
+          const lookups = (forms as FormResponseDto[]).map(form =>
+            this.evaluationService.employeeView(form.id).pipe(
+              map(evaluation => ({ form, evaluation })),
+              catchError(() => of(null)),
+            )
+          );
+
+          forkJoin(lookups).subscribe(evalResults => {
+            const resultByForm = new Map(
+              (results as any[]).map(r => [r.formId, r])
+            );
+
+            const published: Report[] = evalResults
+              .filter((item): item is { form: FormResponseDto; evaluation: any } => item !== null)
+              .map(({ form, evaluation }) => {
+                const result = resultByForm.get(form.id);
+                const score = result?.finalScore ?? result?.score ?? 0;
+                const risk = this.toRisk(result?.riskLevel ?? 'LOW');
+                return {
+                  title: form.title,
+                  formId: form.id,
+                  date: evaluation.publishedAt
+                    ? new Date(evaluation.publishedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+                    : '—',
+                  score,
+                  risk,
+                  commentary: evaluation.closingCommentary ?? '',
+                  counselor: evaluation.createdBy ?? 'Conselheiro',
+                  stressScore: evaluation.stressScore ?? null,
+                  sleepScore: evaluation.sleepScore ?? null,
+                  overloadScore: evaluation.overloadScore ?? null,
+                  fatigueScore: evaluation.fatigueScore ?? null,
+                  disengagementScore: evaluation.disengagementScore ?? null,
+                  isolationScore: evaluation.isolationScore ?? null,
+                };
+              });
+
+            this.reports.set(published);
+            this.loading.set(false);
+          });
         });
       },
+      error: () => this.loading.set(false),
     });
   }
 
-  private loadPublishedAnalyses(forms: FormResponseDto[], formMap: Map<string, FormResponseDto>): void {
-    if (forms.length === 0) {
-      this.analyses.set([]);
-      return;
-    }
-
-    const lookups = forms.map(form =>
-      this.evaluationService.employeeView(form.id).pipe(
-        map(evaluation => ({
-          formId: form.id,
-          title: formMap.get(form.id)?.title ?? form.id,
-          publishedAt: evaluation.publishedAt
-            ? new Date(evaluation.publishedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
-            : '—',
-          commentary: evaluation.closingCommentary ?? 'Sem comentário',
-          counselor: evaluation.createdBy ?? 'Conselheiro',
-        } as PublishedAnalysis)),
-        catchError(() => of(null)),
-      ));
-
-    forkJoin(lookups).subscribe(results => {
-      const published = results.filter((item): item is PublishedAnalysis => item !== null);
-      this.analyses.set(published);
-    });
-  }
-
-  private toRisk(level: 'LOW' | 'MEDIUM' | 'HIGH'): 'low' | 'moderate' | 'high' {
+  private toRisk(level: string): 'low' | 'moderate' | 'high' {
     return level === 'HIGH' ? 'high' : level === 'MEDIUM' ? 'moderate' : 'low';
   }
 
-  riskLabel(r: string) {
-    return ({ low: 'Baixo Risco', moderate: 'Moderado', high: 'Alto Risco' } as Record<string, string>)[r] ?? r;
+  riskLabel(r: string): string {
+    return ({ low: 'Baixo', moderate: 'Moderado', high: 'Alto' } as Record<string, string>)[r] ?? r;
   }
 
   riskWidth(score: number): string {
     return `${score}%`;
   }
+
+  clinicalScores(r: Report): { label: string; value: number | null }[] {
+    return [
+      { label: 'Estresse',       value: r.stressScore },
+      { label: 'Sono',           value: r.sleepScore },
+      { label: 'Sobrecarga',     value: r.overloadScore },
+      { label: 'Fadiga',         value: r.fatigueScore },
+      { label: 'Desengajamento', value: r.disengagementScore },
+      { label: 'Isolamento',     value: r.isolationScore },
+    ].filter(s => s.value !== null);
+  }
 }
+
+
+interface Report {
+  title: string;
+  formId: string;
+  date: string;
+  score: number;
+  risk: 'low' | 'moderate' | 'high';
+}
+
+
+

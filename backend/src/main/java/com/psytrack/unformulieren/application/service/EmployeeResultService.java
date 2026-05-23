@@ -87,6 +87,10 @@ public class EmployeeResultService {
         return employeeResultRepositoryPort.findAll();
     }
 
+    public List<EmployeeResult> listByFormId(UUID formId) {
+        return employeeResultRepositoryPort.findAllByFormId(formId);
+    }
+
     public EmployeeResult update(UUID id, UUID employeeId, UUID formId, int score, RiskLevel riskLevel, Instant calculatedAt) {
         get(id);
         return employeeResultRepositoryPort.save(EmployeeResult.reconstitute(id, employeeId, formId, score, null, riskLevel, calculatedAt));

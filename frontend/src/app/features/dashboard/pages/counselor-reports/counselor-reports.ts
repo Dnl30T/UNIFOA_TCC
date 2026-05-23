@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -84,8 +84,10 @@ export class CounselorReports implements OnInit {
   private evaluationService = inject(TherapistEvaluationService);
   private reportService = inject(ReportService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // ── Tab 1 — Relatórios de Time ────────────────────────────────────────
+  selectedTabIndex = signal(0);
   reportsColumns = ['name', 'generatedAt', 'respondents', 'avgScore', 'generalRisk', 'actions'];
   formsReadiness = signal<FormReadinessRow[]>([]);
   allReports = signal<ReportResponseDto[]>([]);
@@ -119,17 +121,17 @@ export class CounselorReports implements OnInit {
   // Computed: Filter controls for Tab 2
   filterControls = computed(() => {
     const statuses = [
-      { label: 'Pending', value: 'pending' },
-      { label: 'Responded', value: 'responded' },
-      { label: 'Evaluated', value: 'evaluated' },
-      { label: 'No Response', value: 'no_response' }
+      { label: 'Pendente', value: 'pending' },
+      { label: 'Respondeu', value: 'responded' },
+      { label: 'Avaliado', value: 'evaluated' },
+      { label: 'Sem resposta', value: 'no_response' }
     ];
     return [
       {
         key: 'search',
         type: 'search' as const,
-        label: 'Search Members',
-        placeholder: 'Name or email...',
+        label: 'Buscar membros',
+        placeholder: 'Nome ou e-mail...',
       },
       {
         key: 'status',
@@ -164,21 +166,21 @@ export class CounselorReports implements OnInit {
     return [
       {
         id: 'responses',
-        label: 'Responses',
+        label: 'Respostas',
         status: row.respondedCount > 0 ? 'complete' : row.respondedCount > 0 && row.respondedCount < row.totalMembers ? 'active' : 'pending',
-        description: `${row.respondedCount} of ${row.totalMembers} members responded`
+        description: `${row.respondedCount} de ${row.totalMembers} membros responderam`
       },
       {
         id: 'publish',
-        label: 'Publish Analyses',
+        label: 'Publicar Análises',
         status: row.publishedCount > 0 ? 'complete' : row.respondedCount > 0 ? 'active' : 'pending',
-        description: `${row.publishedCount} analyses published`
+        description: `${row.publishedCount} análise(s) publicada(s)`
       },
       {
         id: 'report',
-        label: 'Generate Report',
+        label: 'Gerar Relatório',
         status: row.canGenerate ? 'active' : row.reports.length > 0 ? 'complete' : 'pending',
-        description: row.reports.length > 0 ? `${row.reports.length} report(s) generated` : 'Ready to generate'
+        description: row.reports.length > 0 ? `${row.reports.length} relatório(s) gerado(s)` : 'Pronto para gerar'
       }
     ];
   }
@@ -188,7 +190,7 @@ export class CounselorReports implements OnInit {
     return [
       {
         id: 'generate',
-        label: row.generating ? 'Generating...' : 'Generate Report',
+        label: row.generating ? 'Gerando...' : 'Gerar Relatório',
         icon: row.generating ? 'hourglass_empty' : 'summarize',
         type: 'primary',
         disabled: !row.canGenerate || row.generating,
@@ -218,7 +220,7 @@ export class CounselorReports implements OnInit {
     return [
       {
         id: 'publishBatch',
-        label: `Publish Selected (${this.selectedBatchCount()})`,
+        label: `Publicar Selecionados (${this.selectedBatchCount()})`,
         icon: 'publish',
         type: 'primary',
         disabled: this.selectedBatchCount() === 0 || this.batchPublishing(),
@@ -227,6 +229,9 @@ export class CounselorReports implements OnInit {
   }
 
   ngOnInit(): void {
+    const tab = this.route.snapshot.queryParamMap.get('tab');
+    if (tab !== null) this.selectedTabIndex.set(Number(tab));
+
     this.teamService.getMyTeam().pipe(
       catchError(() => of(null)),
       switchMap(team => {
@@ -585,7 +590,7 @@ export class CounselorReports implements OnInit {
   }
 
   analysisStatusLabel(s: AnalysisStatus): string {
-    return ({ none: 'Sem análise', draft: 'Draft', done: 'Done', submitted: 'Submitted' })[s];
+    return ({ none: 'Sem análise', draft: 'Rascunho', done: 'Concluído', submitted: 'Enviado' })[s];
   }
 
   viewReportDashboard(r: ReportResponseDto): void {
@@ -595,7 +600,7 @@ export class CounselorReports implements OnInit {
   }
 
   riskLabel(r: string): string {
-    return ({ low: 'Low', moderate: 'Moderate', high: 'High', LOW: 'Baixo', MEDIUM: 'Médio', HIGH: 'Alto' } as Record<string, string>)[r] ?? r;
+    return ({ low: 'Baixo', moderate: 'Moderado', high: 'Alto', LOW: 'Baixo', MEDIUM: 'Médio', HIGH: 'Alto' } as Record<string, string>)[r] ?? r;
   }
 
   riskClass(r: string): string {

@@ -6,7 +6,7 @@
     </div>
   </div>
 
-  <mat-tab-group animationDuration="200ms">
+  <mat-tab-group animationDuration="200ms" [selectedIndex]="selectedTabIndex()">
 
     <!-- ── Tab 1: Relatórios de Time (Workflow Steps) ──────────────────── -->
     <mat-tab label="Relatórios de Time">
@@ -222,12 +222,6 @@
                         <button mat-stroked-button style="height:34px;font-size:0.82rem" (click)="viewResponses(row)">
                           <mat-icon>visibility</mat-icon> Ver Respostas
                         </button>
-                        <button mat-flat-button color="primary" style="height:34px;font-size:0.82rem" (click)="showGenerateForm(row)">
-                          <mat-icon>assessment</mat-icon> Gerar Avaliação
-                        </button>
-                        <button mat-button style="height:34px;font-size:0.82rem" [disabled]="row.publishing" (click)="publishRow(row)">
-                          <mat-icon>publish</mat-icon> {{ row.publishing ? 'Publicando...' : 'Publicar' }}
-                        </button>
                       </div>
                     }
 
@@ -235,9 +229,6 @@
                       <div style="margin-top:12px;display:flex;gap:8px">
                         <button mat-stroked-button style="height:34px;font-size:0.82rem" (click)="viewResponses(row)">
                           <mat-icon>visibility</mat-icon> Ver Respostas
-                        </button>
-                        <button mat-button style="height:34px;font-size:0.82rem" [disabled]="row.publishing" (click)="publishRow(row)">
-                          <mat-icon>publish</mat-icon> {{ row.publishing ? 'Publicando...' : 'Publicar novamente' }}
                         </button>
                       </div>
                     }

@@ -56,7 +56,7 @@ class EmployeeResultController(
     ): List<EmployeeResultResponseDto> =
         when {
             employeeId != null -> listOf(EmployeeResultResponseDto.fromDomain(employeeResultService.getByEmployeeId(employeeId)))
-            formId != null -> listOf(EmployeeResultResponseDto.fromDomain(employeeResultService.getByFormId(formId)))
+            formId != null -> employeeResultService.listByFormId(formId).map(EmployeeResultResponseDto::fromDomain)
             else -> employeeResultService.list().map(EmployeeResultResponseDto::fromDomain)
         }
 

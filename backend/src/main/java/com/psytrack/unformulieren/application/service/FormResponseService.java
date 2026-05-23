@@ -160,4 +160,89 @@ public class FormResponseService {
         }
         formResponseRepositoryPort.deleteByFormIdAndEmployeeId(formId, employeeId);
     }
+
+    // ─── Auto Scores ─────────────────────────────────────────────────────────────
+
+    public record AutoScores(
+        Integer stressScore,
+        Integer sleepScore,
+        Integer overloadScore,
+        Integer fatigueScore,
+        Integer disengagementScore,
+        Integer isolationScore,
+        Integer overallScore
+    ) {}
+
+    public AutoScores calculateAutoScores(UUID formId, Map<UUID, Integer> answers) {
+        if (answers == null || answers.isEmpty()) {
+            return new AutoScores(null, null, null, null, null, null, null);
+        }
+
+        Map<UUID, Question> questionById = new HashMap<>();
+        formRepositoryPort.findById(formId)
+                .ifPresent(form -> form.getQuestions()
+                        .forEach(q -> questionById.put(q.getId(), q)));
+
+        // accumulators per category: [weightedSum, totalWeight]
+        double[] stress        = {0d, 0d};
+        double[] sleep         = {0d, 0d};
+        double[] overload      = {0d, 0d};
+        double[] fatigue       = {0d, 0d};
+        double[] disengagement = {0d, 0d};
+        double[] isolation     = {0d, 0d};
+        double[] overall       = {0d, 0d};
+
+        for (Map.Entry<UUID, Integer> entry : answers.entrySet()) {
+            Question question = questionById.get(entry.getKey());
+            if (question == null) continue;
+
+            double weight = parseWeight(question.getConfig());
+            if (weight <= 0d) continue;
+
+            double maxScore = inferMaxScore(question);
+            double minScore = inferMinScore(question);
+            double range = maxScore - minScore;
+            double normalized = range <= 0d
+                    ? 0d
+                    : (Math.max(minScore, Math.min((double) entry.getValue(), maxScore)) - minScore) / range * 100d;
+
+            Map<String, String> cfg = question.getConfig();
+            if (cfg != null) {
+                if ("true".equalsIgnoreCase(cfg.get("flagStress")))        { stress[0]        += normalized * weight; stress[1]        += weight; }
+                if ("true".equalsIgnoreCase(cfg.get("flagSleep")))         { sleep[0]         += normalized * weight; sleep[1]         += weight; }
+                if ("true".equalsIgnoreCase(cfg.get("flagOverload")))      { overload[0]      += normalized * weight; overload[1]      += weight; }
+                if ("true".equalsIgnoreCase(cfg.get("flagFatigue")))       { fatigue[0]       += normalized * weight; fatigue[1]       += weight; }
+                if ("true".equalsIgnoreCase(cfg.get("flagDisengagement"))) { disengagement[0] += normalized * weight; disengagement[1] += weight; }
+                if ("true".equalsIgnoreCase(cfg.get("flagIsolation")))     { isolation[0]     += normalized * weight; isolation[1]     += weight; }
+            }
+            overall[0] += normalized * weight;
+            overall[1] += weight;
+        }
+
+        return new AutoScores(
+            score(stress),
+            score(sleep),
+            score(overload),
+            score(fatigue),
+            score(disengagement),
+            score(isolation),
+            score(overall)
+        );
+    }
+
+    private static Integer score(double[] acc) {
+        return acc[1] <= 0d ? null : (int) Math.round(acc[0] / acc[1]);
+    }
+
+    private double inferMinScore(Question question) {
+        Map<String, String> config = question.getConfig();
+        if (config != null && config.containsKey("min")) {
+            try {
+                return Double.parseDouble(config.get("min"));
+            } catch (NumberFormatException ignored) {}
+        }
+        QuestionType type = question.getType();
+        if (type == QuestionType.LIKERT) return 1d;
+        return 0d;
+    }
 }

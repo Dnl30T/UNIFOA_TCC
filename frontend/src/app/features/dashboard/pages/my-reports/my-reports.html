@@ -2,78 +2,74 @@
   <div class="page-header">
     <div>
       <h2 class="page-title">Meus Relatórios</h2>
-      <p class="page-subtitle">Seus relatórios de avaliação de burnout concluídos</p>
+      <p class="page-subtitle">Análises clínicas publicadas pelo seu terapeuta</p>
     </div>
   </div>
 
-  <mat-card>
-    <mat-card-content>
-      <table mat-table [dataSource]="items()" class="full-table">
+  @if (loading()) {
+    <div class="loading-center">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (reports().length === 0) {
+    <div class="empty-state">
+      <mat-icon>hourglass_empty</mat-icon>
+      <p>Nenhuma análise publicada ainda. Aguarde o seu terapeuta concluir a avaliação.</p>
+    </div>
+  } @else {
+    <div class="reports-list">
+      @for (r of reports(); track r.formId) {
+        <mat-card class="report-card">
+          <mat-card-content>
 
-        <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef>Relatório</th>
-          <td mat-cell *matCellDef="let row"><strong>{{ row.title }}</strong></td>
-        </ng-container>
-
-        <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef>Data</th>
-          <td mat-cell *matCellDef="let row">{{ row.date }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="score">
-          <th mat-header-cell *matHeaderCellDef>Score de Burnout</th>
-          <td mat-cell *matCellDef="let row">
-            <div class="risk-bar-wrap">
-              <span class="score-value">{{ row.score }}</span>
-              <div class="risk-bar">
-                <div class="risk-fill" [class]="row.risk" [style.width]="riskWidth(row.score)"></div>
+            <!-- Header row -->
+            <div class="report-header">
+              <div class="report-title-group">
+                <span class="report-form-title">{{ r.title }}</span>
+                <span class="report-meta">Publicado em {{ r.date }} · por {{ r.counselor }}</span>
               </div>
-              <span class="score-max">/100</span>
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="risk">
-          <th mat-header-cell *matHeaderCellDef>Nível de Risco</th>
-          <td mat-cell *matCellDef="let row">
-            <span class="status-chip" [class]="row.risk">{{ riskLabel(row.risk) }}</span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="action">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let row">
-            <button mat-stroked-button class="compact-btn">
-              <mat-icon>visibility</mat-icon> Visualizar
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="columns"></tr>
-        <tr mat-row *matRowDef="let row; columns: columns"></tr>
-      </table>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card class="analysis-card">
-    <mat-card-content>
-      <h3 class="analysis-title">Análises Individuais Publicadas</h3>
-      @if (analyses().length === 0) {
-        <p class="analysis-empty">Nenhuma análise publicada ainda.</p>
-      } @else {
-        <div class="analysis-list">
-          @for (analysis of analyses(); track analysis.formId) {
-            <div class="analysis-item">
-              <div class="analysis-item-head">
-                <strong>{{ analysis.title }}</strong>
-                <span class="status-chip submitted">Submitted</span>
+              <div class="report-score-group">
+                <span class="score-big">{{ r.score }}</span>
+                <span class="score-sep">/100</span>
+                <span class="status-chip" [class]="r.risk">{{ riskLabel(r.risk) }}</span>
               </div>
-              <p class="analysis-meta">Publicado em {{ analysis.publishedAt }} por {{ analysis.counselor }}</p>
-              <p class="analysis-commentary">{{ analysis.commentary }}</p>
             </div>
-          }
-        </div>
+
+            <!-- Overall score bar -->
+            <div class="score-bar-wrap">
+              <div class="score-bar">
+                <div class="score-fill" [class]="r.risk" [style.width]="riskWidth(r.score)"></div>
+              </div>
+            </div>
+
+            <!-- Clinical dimension scores -->
+            @if (clinicalScores(r).length > 0) {
+              <div class="dimensions-section">
+                <p class="dimensions-label">Panorama de Risco Clínico</p>
+                <div class="dimensions-grid">
+                  @for (s of clinicalScores(r); track s.label) {
+                    <div class="dimension-item">
+                      <span class="dim-label">{{ s.label }}</span>
+                      <div class="dim-bar">
+                        <div class="dim-fill" [style.width.%]="s.value!"></div>
+                      </div>
+                      <span class="dim-value">{{ s.value }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Closing commentary -->
+            @if (r.commentary) {
+              <div class="commentary-section">
+                <p class="commentary-label">Comentário do Terapeuta</p>
+                <p class="commentary-text">{{ r.commentary }}</p>
+              </div>
+            }
+
+          </mat-card-content>
+        </mat-card>
       }
-    </mat-card-content>
-  </mat-card>
+    </div>
+  }
 </div>

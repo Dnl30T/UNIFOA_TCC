@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { catchError, of } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import {
   TherapistEvaluationService,
   TherapistEvaluationDto,
@@ -59,12 +59,32 @@ export class TherapistEvaluationForm implements OnInit {
   updatedAt = signal('');
 
   ngOnInit(): void {
-    this.svc.get(this.formId(), this.employeeId())
-      .pipe(catchError(() => of(null)))
-      .subscribe(data => {
-        if (data) this.applyDto(data);
-        this.loading.set(false);
-      });
+    forkJoin({
+      comprehensive: this.svc.getComprehensive(this.formId(), this.employeeId()).pipe(catchError(() => of(null))),
+    }).subscribe(({ comprehensive }) => {
+      const evaluation = comprehensive?.therapistEvaluation;
+      if (evaluation) this.applyDto(evaluation);
+
+      // Pre-fill risk scores from autoScores where the therapist hasn't saved a value yet
+      const auto = comprehensive?.autoScores;
+      if (auto) {
+        if (this.stressScore()        === null && auto.stressScore        !== null) this.stressScore.set(auto.stressScore);
+        if (this.sleepScore()         === null && auto.sleepScore         !== null) this.sleepScore.set(auto.sleepScore);
+        if (this.overloadScore()      === null && auto.overloadScore      !== null) this.overloadScore.set(auto.overloadScore);
+        if (this.fatigueScore()       === null && auto.fatigueScore       !== null) this.fatigueScore.set(auto.fatigueScore);
+        if (this.disengagementScore() === null && auto.disengagementScore !== null) this.disengagementScore.set(auto.disengagementScore);
+        if (this.isolationScore()     === null && auto.isolationScore     !== null) this.isolationScore.set(auto.isolationScore);
+      }
+
+      // Pre-fill final score: prefer saved manual value, then auto overall
+      if (comprehensive?.finalScore != null) {
+        this.finalScore.set(comprehensive.finalScore);
+      } else if (auto?.overallScore != null && this.finalScore() === null) {
+        this.finalScore.set(auto.overallScore);
+      }
+
+      this.loading.set(false);
+    });
   }
 
   private applyDto(d: TherapistEvaluationDto): void {

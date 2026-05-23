@@ -1,5 +1,6 @@
 package com.psytrack.unformulieren.adapter.out.persistence.employeeResult.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,6 +11,8 @@ public interface EmployeeResultJpaRepository extends JpaRepository<EmployeeResul
     Optional<EmployeeResultJpaEntity> findByEmployeeId(UUID employeeId);
 
     Optional<EmployeeResultJpaEntity> findByFormId(UUID formId);
+
+    List<EmployeeResultJpaEntity> findAllByFormId(UUID formId);
 
     Optional<EmployeeResultJpaEntity> findByEmployeeIdAndFormId(UUID employeeId, UUID formId);
 }

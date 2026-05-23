@@ -27,6 +27,7 @@ interface AnswerRow {
   value: number;
   labels: string[];
   isList: boolean;
+  flags: string[];
 }
 
 @Component({
@@ -131,7 +132,8 @@ export class EmployeeResponses implements OnInit {
             : this.decodeAnswer(value, field);
           const isList = ['MULTIPLE_CHOICE', 'RANKING', 'MATRIX'].includes(field.type);
           const typeLabel = this.typeLabel(field.type);
-          return { index: i + 1, questionText: q.text, field, typeLabel, value, labels, isList };
+          const flags = this.fieldFlags(field);
+          return { index: i + 1, questionText: q.text, field, typeLabel, value, labels, isList, flags };
         });
 
       this.answers.set(rows);
@@ -153,6 +155,18 @@ export class EmployeeResponses implements OnInit {
       DATE: 'Data',
     };
     return map[type] ?? type;
+  }
+
+  private fieldFlags(field: FormField): string[] {
+    const FLAG_LABELS: [keyof FormField, string][] = [
+      ['flagStress',        'Estresse'],
+      ['flagSleep',         'Sono'],
+      ['flagOverload',      'Sobrecarga'],
+      ['flagFatigue',       'Fadiga'],
+      ['flagDisengagement', 'Desengajamento'],
+      ['flagIsolation',     'Isolamento'],
+    ];
+    return FLAG_LABELS.filter(([key]) => !!field[key]).map(([, label]) => label);
   }
 
   private decodeAnswer(value: number, field: FormField): string[] {
@@ -226,6 +240,10 @@ export class EmployeeResponses implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/dashboard/counselor-reports']);
+    if (this.isCounselor()) {
+      this.router.navigate(['/dashboard/counselor-reports'], { queryParams: { tab: 1 } });
+    } else {
+      this.router.navigate(['/dashboard/my-reports']);
+    }
   }
 }

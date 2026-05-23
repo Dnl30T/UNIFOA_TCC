@@ -35,6 +35,31 @@ export interface TherapistEvaluationDto {
 export type TherapistEvaluationRequestDto = Omit<TherapistEvaluationDto,
   'formId' | 'employeeId' | 'createdBy' | 'createdAt' | 'updatedAt'>;
 
+export interface AutoScoresDto {
+  stressScore: number | null;
+  sleepScore: number | null;
+  overloadScore: number | null;
+  fatigueScore: number | null;
+  disengagementScore: number | null;
+  isolationScore: number | null;
+  overallScore: number | null;
+}
+
+export interface TherapistComprehensiveDto {
+  formId: string;
+  employeeId: string;
+  answeredQuestions: number;
+  textQuestions: number;
+  responseStatus: string;
+  helperScore: number | null;
+  finalScore: number | null;
+  burnoutRiskPreAnalysis: 'LOW' | 'MEDIUM' | 'HIGH' | null;
+  submittedAt: string;
+  closedAt: string | null;
+  therapistEvaluation: TherapistEvaluationDto | null;
+  autoScores: AutoScoresDto | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TherapistEvaluationService {
   private http = inject(HttpClient);
@@ -72,5 +97,9 @@ export class TherapistEvaluationService {
 
   getPublishedByForm(formId: string): Observable<TherapistEvaluationDto[]> {
     return this.http.get<TherapistEvaluationDto[]>(`${environment.apiUrl}/therapist-evaluations/form/${formId}/published`);
+  }
+
+  getComprehensive(formId: string, employeeId: string): Observable<TherapistComprehensiveDto> {
+    return this.http.get<TherapistComprehensiveDto>(`${this.url(formId, employeeId)}/comprehensive`);
   }
 }

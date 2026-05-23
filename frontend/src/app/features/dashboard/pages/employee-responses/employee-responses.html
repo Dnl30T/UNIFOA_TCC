@@ -60,6 +60,13 @@
                 <div class="card-top">
                   <span class="q-index">{{ row.index }}</span>
                   <span class="type-badge type-{{ row.field.type | lowercase }}">{{ row.typeLabel }}</span>
+                  @if (isCounselor() && row.flags.length > 0) {
+                    <div class="flag-chips">
+                      @for (flag of row.flags; track flag) {
+                        <span class="flag-chip flag-{{ flag | lowercase }}">{{ flag }}</span>
+                      }
+                    </div>
+                  }
                 </div>
                 <div class="question-text">{{ row.questionText }}</div>
                 <mat-divider></mat-divider>

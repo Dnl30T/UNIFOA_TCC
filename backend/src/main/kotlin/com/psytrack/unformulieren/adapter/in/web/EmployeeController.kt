@@ -97,8 +97,15 @@ class EmployeeController(
         ApiResponse(responseCode = "404", description = "Employee not found"),
     )
     @GetMapping("/{id}")
-    fun get(@Parameter(description = "Employee ID") @PathVariable id: UUID): EmployeeResponseDto =
-        EmployeeResponseDto.fromDomain(employeeService.get(id))
+    fun get(@Parameter(description = "Employee ID") @PathVariable id: UUID): EmployeeResponseDto {
+        val employee = employeeService.get(id)
+        val employeeAppUser = userRepositoryPort.findById(employee.appUserId).orElse(null)
+        return if (employeeAppUser?.isFullyAnonymized == true) {
+            EmployeeResponseDto(employee.id, "Anônimo", employee.appUserId, employee.teamId, employee.status)
+        } else {
+            EmployeeResponseDto.fromDomain(employee)
+        }
+    }
 
     @Operation(summary = "Update employee")
     @ApiResponses(

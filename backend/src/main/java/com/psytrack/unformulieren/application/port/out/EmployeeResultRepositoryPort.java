@@ -18,6 +18,8 @@ public interface EmployeeResultRepositoryPort {
 
     Optional<EmployeeResult> findByFormId(UUID formId);
 
+    List<EmployeeResult> findAllByFormId(UUID formId);
+
     Optional<EmployeeResult> findByEmployeeIdAndFormId(UUID employeeId, UUID formId);
 
     void deleteById(UUID id);

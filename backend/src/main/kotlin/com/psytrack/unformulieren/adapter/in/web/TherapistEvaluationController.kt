@@ -4,6 +4,7 @@ import com.psytrack.unformulieren.adapter.`in`.web.dto.TherapistEvaluationReques
 import com.psytrack.unformulieren.adapter.`in`.web.dto.TherapistComprehensiveResponseDto
 import com.psytrack.unformulieren.adapter.`in`.web.dto.TherapistEvaluationResponseDto
 import com.psytrack.unformulieren.adapter.`in`.web.dto.PublishBatchRequestDto
+import com.psytrack.unformulieren.adapter.`in`.web.dto.AutoScoresDto
 import com.psytrack.unformulieren.application.service.EmployeeResultService
 import com.psytrack.unformulieren.application.service.FormResponseService
 import com.psytrack.unformulieren.application.service.TherapistEvaluationService
@@ -89,6 +90,7 @@ class TherapistEvaluationController(
         val response = formResponseService.getByFormAndEmployee(formId, employeeId)
         val result = employeeResultService.findByEmployeeIdAndFormId(employeeId, formId).orElse(null)
         val evaluation = service.find(formId, employeeId).orElse(null)
+        val autoScores = formResponseService.calculateAutoScores(formId, response.answers)
 
         return TherapistComprehensiveResponseDto(
             formId = formId,
@@ -102,6 +104,15 @@ class TherapistEvaluationController(
             submittedAt = response.submittedAt,
             closedAt = response.closedAt,
             therapistEvaluation = evaluation?.toDto(includePrivate = isCounselorOrAdmin),
+            autoScores = AutoScoresDto(
+                stressScore = autoScores.stressScore(),
+                sleepScore = autoScores.sleepScore(),
+                overloadScore = autoScores.overloadScore(),
+                fatigueScore = autoScores.fatigueScore(),
+                disengagementScore = autoScores.disengagementScore(),
+                isolationScore = autoScores.isolationScore(),
+                overallScore = autoScores.overallScore(),
+            ),
         )
     }
 
