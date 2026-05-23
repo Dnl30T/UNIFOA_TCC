@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -23,8 +23,9 @@ export class EmployeeService {
   private http = inject(HttpClient);
   private readonly api = `${environment.apiUrl}/employees`;
 
-  getAll(): Observable<EmployeeResponseDto[]> {
-    return this.http.get<EmployeeResponseDto[]>(this.api);
+  getAll(options?: { revealNames?: boolean }): Observable<EmployeeResponseDto[]> {
+    const params = options?.revealNames ? new HttpParams().set('revealNames', 'true') : undefined;
+    return this.http.get<EmployeeResponseDto[]>(this.api, { params });
   }
 
   getMe(): Observable<EmployeeResponseDto> {

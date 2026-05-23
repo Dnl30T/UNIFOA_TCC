@@ -8,10 +8,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { EmployeeService, EmployeeResponseDto } from '../../../../core/services/employee.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
+import { EmployeeService } from '../../../../core/services/employee.service';
 import { TeamService } from '../../../../core/services/team.service';
+import { FormService } from '../../../../core/services/form.service';
+import { EmployeeResultService } from '../../../../core/services/employee-result.service';
 
 type ResponseStatus = 'responded' | 'pending';
 type FilterOption = 'all' | ResponseStatus;
@@ -36,9 +38,12 @@ interface TeamMember {
 export class TeamOverview implements OnInit {
   private employeeService = inject(EmployeeService);
   private teamService = inject(TeamService);
+  private formService = inject(FormService);
+  private employeeResultService = inject(EmployeeResultService);
 
   members = signal<TeamMember[]>([]);
   teamCode = signal<string | null>(null);
+  teamId = signal<string | null>(null);
   codeCopied = signal(false);
   filter = signal<FilterOption>('all');
 
@@ -68,6 +73,7 @@ export class TeamOverview implements OnInit {
       if (t) {
         this.hasTeam.set(true);
         if (t.teamCode) this.teamCode.set(t.teamCode);
+        this.teamId.set(t.id);
         this.loadMembers();
       } else {
         this.hasTeam.set(false);
@@ -76,15 +82,31 @@ export class TeamOverview implements OnInit {
   }
 
   private loadMembers(): void {
-    this.employeeService.getAll().subscribe({
-      next: (employees: EmployeeResponseDto[]) => {
-        this.members.set(employees.map(e => ({
-          name: e.name,
-          jobTitle: e.status === 'INACTIVE' ? 'Inativo' : 'Colaborador',
-          responded: false,
-          initials: e.name.split(' ').map((p: string) => p[0]).slice(0, 2).join('').toUpperCase(),
-        })));
-      },
+    const teamId = this.teamId()!;
+    forkJoin({
+      employees: this.employeeService.getAll({ revealNames: true }),
+      activeForms: this.formService.getAll('ACTIVE').pipe(catchError(() => of([]))),
+    }).pipe(
+      switchMap(({ employees, activeForms }) => {
+        const activeForm = activeForms.find(f => f.teamIds?.includes(teamId)) ?? null;
+        if (!activeForm) {
+          return of({ employees, respondedIds: new Set<string>() });
+        }
+        return this.employeeResultService.getAll({ formId: activeForm.id }).pipe(
+          catchError(() => of([])),
+          switchMap(results => of({
+            employees,
+            respondedIds: new Set<string>(results.map(r => r.employeeId)),
+          }))
+        );
+      })
+    ).subscribe(({ employees, respondedIds }) => {
+      this.members.set(employees.map(e => ({
+        name: e.name,
+        jobTitle: e.status === 'INACTIVE' ? 'Inativo' : 'Colaborador',
+        responded: respondedIds.has(e.id),
+        initials: e.name.split(' ').map((p: string) => p[0]).slice(0, 2).join('').toUpperCase(),
+      })));
     });
   }
 

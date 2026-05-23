@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
@@ -53,7 +54,11 @@ class EmployeeController(
     @Operation(summary = "List employees", description = "Returns employees visible to the authenticated user. Managers and Counselors only see their own team.")
     @ApiResponse(responseCode = "200", description = "List of employees")
     @GetMapping
-    fun list(authentication: Authentication): List<EmployeeResponseDto> {
+    fun list(
+        @Parameter(description = "Reveal real names for anonymized employees (MANAGER only, use for team overview)")
+        @RequestParam(required = false, defaultValue = "false") revealNames: Boolean,
+        authentication: Authentication,
+    ): List<EmployeeResponseDto> {
         val isManager = authentication.authorities.any { it.authority == "ROLE_MANAGER" }
         val isCounselor = authentication.authorities.any { it.authority == "ROLE_COUNSELOR" }
         val employees = if (isManager || isCounselor) {
@@ -67,9 +72,10 @@ class EmployeeController(
         } else {
             employeeService.list()
         }
+        val showRealName = isManager && revealNames
         return employees.map { employee ->
             val employeeAppUser = userRepositoryPort.findById(employee.appUserId).orElse(null)
-            if (employeeAppUser?.isFullyAnonymized == true) {
+            if (!showRealName && employeeAppUser?.isFullyAnonymized == true) {
                 EmployeeResponseDto(employee.id, "An\u00f4nimo", employee.appUserId, employee.teamId, employee.status)
             } else {
                 EmployeeResponseDto.fromDomain(employee)
