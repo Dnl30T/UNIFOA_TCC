@@ -445,6 +445,9 @@ export class CounselorReports implements OnInit {
       });
 
       rows.sort((a, b) => {
+        const aSubmitted = a.analysisStatus === 'submitted' ? 1 : 0;
+        const bSubmitted = b.analysisStatus === 'submitted' ? 1 : 0;
+        if (aSubmitted !== bSubmitted) return aSubmitted - bSubmitted;
         const order: Record<MemberStatus, number> = { evaluated: 0, responded: 1, no_response: 2, pending: 3 };
         if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
         return b.responseCount - a.responseCount;
@@ -591,6 +594,10 @@ export class CounselorReports implements OnInit {
 
   analysisStatusLabel(s: AnalysisStatus): string {
     return ({ none: 'Sem análise', draft: 'Rascunho', done: 'Concluído', submitted: 'Enviado' })[s];
+  }
+
+  analysisStatusIcon(s: AnalysisStatus): string {
+    return ({ none: '', draft: 'edit_note', done: 'task_alt', submitted: 'check_circle' })[s];
   }
 
   viewReportDashboard(r: ReportResponseDto): void {

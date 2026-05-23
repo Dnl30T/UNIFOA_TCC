@@ -50,7 +50,7 @@ public class EmployeeResultService {
             formId,
             existing.getHelperScore(),
             finalScore,
-            existing.getRiskLevel(),
+            classifyBurnoutRisk(finalScore),
             updatedAt));
     }
 

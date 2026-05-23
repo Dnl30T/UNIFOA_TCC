@@ -48,12 +48,12 @@
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card" [class]="'risk-' + report()!.generalRisk.toLowerCase()">
+      <mat-card class="kpi-card" [class]="'risk-' + riskFromScore(report()!.averageScore).toLowerCase()">
         <mat-card-content>
           <div class="kpi-icon" style="background:#ffebee"><mat-icon style="color:#c62828">warning_amber</mat-icon></div>
           <div class="kpi-body">
             <p class="kpi-label">Risco Geral</p>
-            <p class="kpi-value">{{ riskLabel(report()!.generalRisk) }}</p>
+            <p class="kpi-value">{{ riskLabel(riskFromScore(report()!.averageScore)) }}</p>
           </div>
         </mat-card-content>
       </mat-card>

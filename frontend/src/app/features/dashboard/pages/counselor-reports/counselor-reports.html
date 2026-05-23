@@ -198,10 +198,18 @@
                             {{ row.responseCount }} respostas
                           </span>
                         }
-                        <span class="status-chip" [class]="row.status">
-                          <mat-icon>{{ statusIcon(row.status) }}</mat-icon>
-                          {{ statusLabel(row.status) }}
-                        </span>
+                        @if (row.analysisStatus === 'none') {
+                          <span class="status-chip" [class]="row.status">
+                            <mat-icon>{{ statusIcon(row.status) }}</mat-icon>
+                            {{ statusLabel(row.status) }}
+                          </span>
+                        }
+                        @if (row.analysisStatus !== 'none') {
+                          <span class="status-chip" [class]="row.analysisStatus">
+                            <mat-icon>{{ analysisStatusIcon(row.analysisStatus) }}</mat-icon>
+                            {{ analysisStatusLabel(row.analysisStatus) }}
+                          </span>
+                        }
                       </div>
                     </div>
 

@@ -229,8 +229,8 @@
   }
 
   &.evaluated {
-    background: #dcfce7;
-    color: #15803d;
+    background: #ccfbf1;
+    color: #0f766e;
   }
 
   &.no_response {
@@ -239,18 +239,21 @@
   }
 
   &.draft {
-    background: #fff7ed;
-    color: #9a3412;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
   }
 
   &.done {
-    background: #ecfeff;
-    color: #155e75;
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
   }
 
   &.submitted {
-    background: #dcfce7;
-    color: #166534;
+    background: #16a34a;
+    color: #fff;
+    border: 1px solid #15803d;
   }
 
   &.none {

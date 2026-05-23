@@ -177,7 +177,14 @@ export class ReportViewer implements OnInit, OnDestroy {
     if (!el) return;
     this.donutChart?.dispose();
     this.donutChart = echarts.init(el);
-    const dist = report.riskDistribution ?? {};
+
+    // Recompute distribution from live scores instead of stale stored riskDistribution
+    const rows = this.members();
+    const dist = { LOW: 0, MEDIUM: 0, HIGH: 0 };
+    rows.forEach(r => {
+      const risk = this.riskFromScore(r.score);
+      dist[risk as keyof typeof dist]++;
+    });
 
     this.donutChart.setOption({
       tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
@@ -296,7 +303,7 @@ export class ReportViewer implements OnInit, OnDestroy {
         data: counts.map((v, i) => ({
           value: v,
           itemStyle: {
-            color: ['#ef4444', '#f59e0b', '#f59e0b', '#15803d', '#15803d'][i],
+            color: ['#15803d', '#15803d', '#f59e0b', '#f59e0b', '#ef4444'][i],
             borderRadius: [4, 4, 0, 0],
           },
         })),
@@ -325,6 +332,10 @@ export class ReportViewer implements OnInit, OnDestroy {
 
   riskClass(r: string): string {
     return ({ LOW: 'low', MEDIUM: 'moderate', HIGH: 'high' } as Record<string, string>)[r] ?? '';
+  }
+
+  riskFromScore(score: number): string {
+    return score >= 70 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW';
   }
 
   scoreColor(s: number): string {
