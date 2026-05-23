@@ -2,6 +2,11 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
+ARG NPM_REGISTRY=https://registry.npmjs.org/
+ARG NPM_STRICT_SSL=true
+RUN npm config set registry "$NPM_REGISTRY" \
+    && npm config set strict-ssl "$NPM_STRICT_SSL"
+
 # Install dependencies (layer cache)
 COPY package.json package-lock.json ./
 RUN npm ci

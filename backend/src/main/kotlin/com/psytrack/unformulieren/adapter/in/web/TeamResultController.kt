@@ -2,6 +2,8 @@ package com.psytrack.unformulieren.adapter.`in`.web
 
 import com.psytrack.unformulieren.adapter.`in`.web.dto.TeamResultRequestDto
 import com.psytrack.unformulieren.adapter.`in`.web.dto.TeamResultResponseDto
+import com.psytrack.unformulieren.application.port.out.UserRepositoryPort
+import com.psytrack.unformulieren.application.service.TeamService
 import com.psytrack.unformulieren.application.service.TeamResultService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -27,6 +30,8 @@ import java.util.UUID
 @RequestMapping("/team-results")
 class TeamResultController(
     private val teamResultService: TeamResultService,
+    private val userRepositoryPort: UserRepositoryPort,
+    private val teamService: TeamService,
 ) {
 
     @Operation(summary = "Create team result", description = "Records the consolidated psychological health result for a team on a form.")
@@ -51,12 +56,30 @@ class TeamResultController(
     fun list(
         @Parameter(description = "Filter by team ID") @RequestParam(required = false) teamId: UUID?,
         @Parameter(description = "Filter by form ID") @RequestParam(required = false) formId: UUID?,
-    ): List<TeamResultResponseDto> =
-        when {
-            teamId != null -> listOf(TeamResultResponseDto.fromDomain(teamResultService.getByTeamId(teamId)))
-            formId != null -> listOf(TeamResultResponseDto.fromDomain(teamResultService.getByFormId(formId)))
-            else -> teamResultService.list().map(TeamResultResponseDto::fromDomain)
+        authentication: Authentication,
+    ): List<TeamResultResponseDto> {
+        val isManager = authentication.authorities.any { it.authority == "ROLE_MANAGER" }
+        if (!isManager) {
+            return when {
+                teamId != null -> listOf(TeamResultResponseDto.fromDomain(teamResultService.getByTeamId(teamId)))
+                formId != null -> listOf(TeamResultResponseDto.fromDomain(teamResultService.getByFormId(formId)))
+                else -> teamResultService.list().map(TeamResultResponseDto::fromDomain)
+            }
         }
+
+        val appUser = userRepositoryPort.findByUsername(authentication.name).orElse(null)
+        val managerTeamId = appUser?.let { teamService.findByManagerId(it.id)?.id } ?: return emptyList()
+
+        val scopedResults = teamResultService.list().filter { result ->
+            result.teamId == managerTeamId && (formId == null || result.formId == formId)
+        }
+
+        if (teamId != null && teamId != managerTeamId) {
+            return emptyList()
+        }
+
+        return scopedResults.map(TeamResultResponseDto::fromDomain)
+    }
 
     @Operation(summary = "Get team result by ID")
     @ApiResponses(
@@ -64,8 +87,21 @@ class TeamResultController(
         ApiResponse(responseCode = "404", description = "Result not found"),
     )
     @GetMapping("/{id}")
-    fun get(@Parameter(description = "Result ID") @PathVariable id: UUID): TeamResultResponseDto =
-        TeamResultResponseDto.fromDomain(teamResultService.get(id))
+    fun get(
+        @Parameter(description = "Result ID") @PathVariable id: UUID,
+        authentication: Authentication,
+    ): TeamResultResponseDto {
+        val result = teamResultService.get(id)
+        val isManager = authentication.authorities.any { it.authority == "ROLE_MANAGER" }
+        if (isManager) {
+            val appUser = userRepositoryPort.findByUsername(authentication.name).orElse(null)
+            val managerTeamId = appUser?.let { teamService.findByManagerId(it.id)?.id }
+            if (managerTeamId == null || result.teamId != managerTeamId) {
+                throw org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "Team result not found")
+            }
+        }
+        return TeamResultResponseDto.fromDomain(result)
+    }
 
     @Operation(summary = "Update team result")
     @ApiResponses(

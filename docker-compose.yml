@@ -4,7 +4,6 @@ services:
 
   db:
     image: postgres:16-alpine
-    container_name: unformulieren-db
     environment:
       POSTGRES_DB: unformulieren
       POSTGRES_USER: unformulieren
@@ -21,7 +20,6 @@ services:
 
   scylladb:
     image: scylladb/scylla:5.4
-    container_name: unformulieren-scylla
     command: --developer-mode=1 --overprovisioned=1
     ports:
       - "9042:9042"
@@ -37,7 +35,6 @@ services:
 
   scylladb-init:
     image: scylladb/scylla:5.4
-    container_name: unformulieren-scylla-init
     depends_on:
       scylladb:
         condition: service_healthy
@@ -48,7 +45,6 @@ services:
 
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.32.0
-    container_name: unformulieren-azurite
     command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --location /data --loose
     ports:
       - "10000:10000"
@@ -67,7 +63,6 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: unformulieren-backend
     ports:
       - "8080:8080"
     depends_on:
@@ -94,7 +89,9 @@ services:
   frontend:
     build:
       context: ./frontend
-    container_name: unformulieren-frontend
+      args:
+        NPM_REGISTRY: https://artifactory.michelin.com/api/npm/npm/
+        NPM_STRICT_SSL: "false"
     ports:
       - "4200:80"
     depends_on:

@@ -23,7 +23,6 @@ const NAV_CONFIG: Record<UserRole, NavItem[]> = {
     { label: 'Dashboard',          icon: 'dashboard',      route: '/dashboard/home' },
     { label: 'Minhas Avaliações', icon: 'assignment',     route: '/dashboard/manager-assessments' },
     { label: 'Visão do Time',      icon: 'groups',         route: '/dashboard/team-overview' },
-    { label: 'Histórico de Relatórios', icon: 'history',   route: '/dashboard/report-history' },
     { label: 'Configurações',       icon: 'settings',       route: '/dashboard/settings' },
   ],
   counselor: [
@@ -51,9 +50,9 @@ const NAV_CONFIG: Record<UserRole, NavItem[]> = {
   styleUrl: './dashboard-shell.scss',
 })
 export class DashboardShell {
-  private roleService = inject(RoleService);
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private readonly roleService = inject(RoleService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   sidebarOpen = signal(true);
 

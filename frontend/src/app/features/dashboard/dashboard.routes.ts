@@ -36,7 +36,7 @@ export const dashboardRoutes: Routes = [
       },
       {
         path: 'report-history',
-        canActivate: [roleGuard('MANAGER', 'ADMIN')],
+        canActivate: [roleGuard('COUNSELOR', 'ADMIN')],
         loadComponent: () => import('./pages/report-history/report-history').then(m => m.ReportHistory),
       },
       // Counselor routes
