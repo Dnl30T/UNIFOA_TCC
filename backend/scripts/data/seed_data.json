@@ -1,0 +1,198 @@
+{
+  "managers": [
+    {
+      "username": "manager_alice",
+      "password": "Senha@123",
+      "email": "alice.manager@psytrack.dev",
+      "name": "Alice Ferreira",
+      "phoneNumber": "+55 11 91234-0001",
+      "company": "PsyTrack Ltda",
+      "jobTitle": "Gerente de Equipe A"
+    },
+    {
+      "username": "manager_bob",
+      "password": "Senha@123",
+      "email": "bob.manager@psytrack.dev",
+      "name": "Bob Carvalho",
+      "phoneNumber": "+55 11 91234-0002",
+      "company": "PsyTrack Ltda",
+      "jobTitle": "Gerente de Equipe B"
+    }
+  ],
+  "counselors": [
+    {
+      "username": "counselor_carol",
+      "password": "Senha@123",
+      "email": "carol.counselor@psytrack.dev",
+      "name": "Carol Souza",
+      "phoneNumber": "+55 21 91234-0003",
+      "company": "PsyTrack Ltda",
+      "jobTitle": "Psicóloga Organizacional"
+    },
+    {
+      "username": "counselor_daniel",
+      "password": "Senha@123",
+      "email": "daniel.counselor@psytrack.dev",
+      "name": "Daniel Lima",
+      "phoneNumber": "+55 21 91234-0004",
+      "company": "PsyTrack Ltda",
+      "jobTitle": "Orientador de Bem-Estar"
+    }
+  ],
+  "teams": [
+    {
+      "name": "Equipe Alpha",
+      "managerEmail": "alice.manager@psytrack.dev",
+      "counselorEmail": "carol.counselor@psytrack.dev",
+      "employees": [
+        {
+          "username": "emp_eve",
+          "password": "Senha@123",
+          "email": "eve.emp@psytrack.dev",
+          "name": "Eve Nunes",
+          "jobTitle": "Analista"
+        },
+        {
+          "username": "emp_frank",
+          "password": "Senha@123",
+          "email": "frank.emp@psytrack.dev",
+          "name": "Frank Dias",
+          "jobTitle": "Desenvolvedor"
+        },
+        {
+          "username": "emp_grace",
+          "password": "Senha@123",
+          "email": "grace.emp@psytrack.dev",
+          "name": "Grace Moura",
+          "jobTitle": "Designer"
+        },
+        {
+          "username": "emp_kevin",
+          "password": "Senha@123",
+          "email": "kevin.emp@psytrack.dev",
+          "name": "Kevin Costa",
+          "jobTitle": "Backend Developer"
+        },
+        {
+          "username": "emp_laura",
+          "password": "Senha@123",
+          "email": "laura.emp@psytrack.dev",
+          "name": "Laura Pires",
+          "jobTitle": "Frontend Developer"
+        },
+        {
+          "username": "emp_monique",
+          "password": "Senha@123",
+          "email": "monique.emp@psytrack.dev",
+          "name": "Monique Silva",
+          "jobTitle": "Data Scientist"
+        },
+        {
+          "username": "emp_nicolas",
+          "password": "Senha@123",
+          "email": "nicolas.emp@psytrack.dev",
+          "name": "Nicolas Vaz",
+          "jobTitle": "Product Designer"
+        },
+        {
+          "username": "emp_ana",
+          "password": "Senha@123",
+          "email": "ana.emp@psytrack.dev",
+          "name": "Ana Beatriz Lima",
+          "jobTitle": "UX Researcher"
+        },
+        {
+          "username": "emp_rafael",
+          "password": "Senha@123",
+          "email": "rafael.emp@psytrack.dev",
+          "name": "Rafael Mendonça",
+          "jobTitle": "Tech Lead"
+        },
+        {
+          "username": "emp_camila",
+          "password": "Senha@123",
+          "email": "camila.emp@psytrack.dev",
+          "name": "Camila Torres",
+          "jobTitle": "Analista de Dados"
+        }
+      ]
+    },
+    {
+      "name": "Equipe Beta",
+      "managerEmail": "bob.manager@psytrack.dev",
+      "counselorEmail": "daniel.counselor@psytrack.dev",
+      "employees": [
+        {
+          "username": "emp_henry",
+          "password": "Senha@123",
+          "email": "henry.emp@psytrack.dev",
+          "name": "Henry Rocha",
+          "jobTitle": "QA Engineer"
+        },
+        {
+          "username": "emp_iris",
+          "password": "Senha@123",
+          "email": "iris.emp@psytrack.dev",
+          "name": "Iris Campos",
+          "jobTitle": "DevOps"
+        },
+        {
+          "username": "emp_jack",
+          "password": "Senha@123",
+          "email": "jack.emp@psytrack.dev",
+          "name": "Jack Barros",
+          "jobTitle": "Scrum Master"
+        },
+        {
+          "username": "emp_olivia",
+          "password": "Senha@123",
+          "email": "olivia.emp@psytrack.dev",
+          "name": "Olivia Santos",
+          "jobTitle": "Copywriter"
+        },
+        {
+          "username": "emp_pedro",
+          "password": "Senha@123",
+          "email": "pedro.emp@psytrack.dev",
+          "name": "Pedro Alcantara",
+          "jobTitle": "Business Analyst"
+        },
+        {
+          "username": "emp_fernanda",
+          "password": "Senha@123",
+          "email": "fernanda.emp@psytrack.dev",
+          "name": "Fernanda Gomes",
+          "jobTitle": "Cloud Engineer"
+        },
+        {
+          "username": "emp_lucas",
+          "password": "Senha@123",
+          "email": "lucas.emp@psytrack.dev",
+          "name": "Lucas Martins",
+          "jobTitle": "Mobile Developer"
+        },
+        {
+          "username": "emp_beatriz",
+          "password": "Senha@123",
+          "email": "beatriz.emp@psytrack.dev",
+          "name": "Beatriz Cunha",
+          "jobTitle": "Analista de Qualidade"
+        },
+        {
+          "username": "emp_thales",
+          "password": "Senha@123",
+          "email": "thales.emp@psytrack.dev",
+          "name": "Thales Nogueira",
+          "jobTitle": "Engenheiro de Dados"
+        },
+        {
+          "username": "emp_sofia",
+          "password": "Senha@123",
+          "email": "sofia.emp@psytrack.dev",
+          "name": "Sofia Andrade",
+          "jobTitle": "Analista de Suporte"
+        }
+      ]
+    }
+  ]
+}

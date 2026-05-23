@@ -1,0 +1,109 @@
+{
+  "title": "Escala de Burnout",
+  "response_scale": ["Nunca", "Raramente", "Às vezes", "Frequentemente", "Sempre"],
+  "sections": [
+    {
+      "id": "exaustao_emocional",
+      "label": "Exaustão emocional",
+      "questions": [
+        {
+          "id": 1,
+          "text": "Ao final do dia de trabalho, sinto-me emocionalmente relaxado",
+          "inverted": true
+        },
+        {
+          "id": 2,
+          "text": "Sinto que meu trabalho consome toda a minha energia",
+          "inverted": false
+        },
+        {
+          "id": 3,
+          "text": "Ao final do dia de trabalho, sinto-me exausto",
+          "inverted": false
+        },
+        {
+          "id": 4,
+          "text": "Sinto dificuldade em recuperar minha energia após o trabalho",
+          "inverted": false
+        },
+        {
+          "id": 5,
+          "text": "Me sinto constantemente cansado(a), mesmo após descanso",
+          "inverted": false
+        },
+        {
+          "id": 6,
+          "text": "Tenho apresentado sintomas físicos frequentes como dor de cabeça, insônia e tensão",
+          "inverted": false
+        }
+      ]
+    },
+    {
+      "id": "cinismo_distanciamento",
+      "label": "Cinismo / distanciamento",
+      "questions": [
+        {
+          "id": 7,
+          "text": "Tenho sentido menos interesse pelas minhas atividades no trabalho",
+          "inverted": false
+        },
+        {
+          "id": 8,
+          "text": "Tenho me sentido mais indiferente em relação ao trabalho",
+          "inverted": false
+        },
+        {
+          "id": 9,
+          "text": "Sinto-me menos envolvido com as atividades do trabalho",
+          "inverted": false
+        },
+        {
+          "id": 10,
+          "text": "Sinto-me engajado com as atividades que realizo no trabalho",
+          "inverted": true
+        },
+        {
+          "id": 11,
+          "text": "Tenho dificuldade de me envolver emocionalmente com o trabalho",
+          "inverted": false
+        },
+        {
+          "id": 12,
+          "text": "Sinto que o trabalho perdeu o sentido ou valor",
+          "inverted": false
+        },
+        {
+          "id": 13,
+          "text": "Estou mais irritado(a), impaciente e desmotivado(a)",
+          "inverted": false
+        }
+      ]
+    },
+    {
+      "id": "eficacia_profissional",
+      "label": "Eficácia profissional",
+      "questions": [
+        {
+          "id": 14,
+          "text": "Sinto que estou sendo menos produtivo do que poderia ser",
+          "inverted": false
+        },
+        {
+          "id": 15,
+          "text": "Tenho dificuldade em realizar tarefas que antes eram simples",
+          "inverted": false
+        },
+        {
+          "id": 16,
+          "text": "Sinto que minha capacidade de concentração diminuiu",
+          "inverted": false
+        },
+        {
+          "id": 17,
+          "text": "Sinto que estou desempenhando bem minhas funções",
+          "inverted": true
+        }
+      ]
+    }
+  ]
+}
